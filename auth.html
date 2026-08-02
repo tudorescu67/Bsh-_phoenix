@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHOENIX Login</title>
+<style>
+  body{margin:0;font-family:Inter,Arial,sans-serif;background:#0A0C12;color:#EDEFF7;display:flex;align-items:center;justify-content:center;min-height:100vh;}
+  .card{background:#12151F;border:1px solid rgba(255,255,255,0.08);padding:28px;border-radius:16px;width:min(420px,90vw);box-shadow:0 18px 60px rgba(0,0,0,0.35);} 
+  h1{margin:0 0 8px;font-size:24px;} .sub{color:#7C8299;margin-bottom:20px;} button{width:100%;padding:12px;border-radius:10px;border:none;background:#5865F2;color:white;font-weight:700;cursor:pointer;} .hint{font-size:12px;color:#7C8299;margin-top:12px;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>PHOENIX Admin</h1>
+    <div class="sub">Autentificare prin Discord pentru panoul de control</div>
+    <button onclick="window.location.href='/auth/discord'">Conectează-te cu Discord</button>
+    <div class="hint">După autentificare, vei fi redirecționat înapoi în dashboard.</div>
+  </div>
+</body>
+</html>

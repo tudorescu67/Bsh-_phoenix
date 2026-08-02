@@ -1,0 +1,540 @@
+﻿<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS — Panou de control</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+:root{
+  --bg:#0A0C12;
+  --surface:#12151F;
+  --surface-raised:#191D2B;
+  --surface-hover:#1F2333;
+  --line: rgba(255,255,255,0.07);
+  --accent:#FF9F43;
+  --accent-dim: rgba(255,159,67,0.14);
+  --violet:#7C6CFF;
+  --violet-dim: rgba(124,108,255,0.14);
+  --text:#EDEFF7;
+  --muted:#7C8299;
+  --muted-2:#565C72;
+  --success:#3ECF8E;
+  --success-dim: rgba(62,207,142,0.13);
+  --danger:#FF5C7A;
+  --danger-dim: rgba(255,92,122,0.13);
+  --warn:#FFD166;
+  --warn-dim: rgba(255,209,102,0.13);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{
+  background: var(--bg);
+  color: var(--text);
+  font-family:'Inter', sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+::selection{ background: var(--accent-dim); color: var(--accent); }
+.app{ display:flex; min-height:100vh; }
+.sidebar{
+  width:236px; flex-shrink:0;
+  background: var(--surface);
+  border-right:1px solid var(--line);
+  display:flex; flex-direction:column;
+  padding:22px 14px;
+  position:sticky; top:0; height:100vh;
+}
+.brand{ display:flex; align-items:center; gap:10px; padding:4px 10px 22px 10px; }
+.brand-mark{
+  width:34px; height:34px; border-radius:9px;
+  background: linear-gradient(135deg, var(--accent), var(--violet));
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Space Grotesk'; font-weight:700; font-size:15px; color:#0A0C12;
+  flex-shrink:0;
+}
+.brand-name{ font-family:'Space Grotesk'; font-weight:700; font-size:17px; letter-spacing:0.3px; }
+.brand-sub{ font-size:10.5px; color:var(--muted-2); font-family:'JetBrains Mono'; letter-spacing:0.5px; margin-top:1px; }
+.nav-group-label{
+  font-size:10.5px; color:var(--muted-2); font-family:'JetBrains Mono';
+  text-transform:uppercase; letter-spacing:1px; padding:16px 12px 6px;
+}
+.nav-item{
+  display:flex; align-items:center; gap:11px;
+  padding:9px 12px; border-radius:8px; cursor:pointer;
+  color:var(--muted); font-size:13.5px; font-weight:500;
+  transition: background .12s, color .12s;
+  user-select:none;
+}
+.nav-item:hover{ background: var(--surface-hover); color:var(--text); }
+.nav-item.active{ background: var(--accent-dim); color: var(--accent); }
+.nav-item .ic{ width:17px; height:17px; flex-shrink:0; opacity:0.9; }
+.nav-item .badge{
+  margin-left:auto; font-family:'JetBrains Mono'; font-size:10px;
+  background: var(--surface-hover); color:var(--muted); padding:1px 6px; border-radius:20px;
+}
+.nav-item.active .badge{ background: var(--accent); color:#0A0C12; }
+.sidebar-foot{
+  margin-top:auto; padding:12px; border-top:1px solid var(--line); margin-top:14px;
+  display:flex; align-items:center; gap:10px;
+}
+.pulse-dot{ width:8px; height:8px; border-radius:50%; background:var(--success); position:relative; flex-shrink:0; }
+.pulse-dot::after{
+  content:''; position:absolute; inset:-4px; border-radius:50%; border:1px solid var(--success);
+  animation: pulseRing 2s ease-out infinite;
+}
+@keyframes pulseRing{ 0%{ transform:scale(0.6); opacity:0.9;} 100%{ transform:scale(2.1); opacity:0;} }
+.sidebar-foot-text{ font-size:11.5px; color:var(--muted-2); font-family:'JetBrains Mono'; line-height:1.4; }
+.sidebar-foot-text b{ color:var(--muted); font-weight:600; }
+.main{ flex:1; min-width:0; }
+.topbar{
+  height:66px; border-bottom:1px solid var(--line);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 28px; position:sticky; top:0; background:rgba(10,12,18,0.85); backdrop-filter:blur(10px); z-index:5;
+}
+.topbar-title{ font-family:'Space Grotesk'; font-weight:600; font-size:19px; }
+.topbar-title .cmd{ color:var(--muted-2); font-family:'JetBrains Mono'; font-size:13px; font-weight:400; margin-left:8px;}
+.topbar-right{ display:flex; align-items:center; gap:18px; }
+.heartbeat{ display:flex; align-items:center; gap:10px; }
+.heartbeat svg{ display:block; }
+.heartbeat-label{ font-family:'JetBrains Mono'; font-size:11px; color:var(--muted-2); }
+.heartbeat-label b{ color: var(--success); font-weight:600; }
+.hb-line{ stroke: var(--success); stroke-width:1.6; fill:none; filter: drop-shadow(0 0 3px rgba(62,207,142,0.5)); }
+.avatar{
+  width:32px; height:32px; border-radius:8px;
+  background: linear-gradient(135deg, var(--violet), var(--accent));
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Space Grotesk'; font-weight:700; font-size:12px; color:#0A0C12;
+}
+.content{ padding:28px; max-width:1180px; }
+.section{ display:none; animation: fadeIn .25s ease; }
+.section.active{ display:block; }
+@keyframes fadeIn{ from{ opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+.section-head{ margin-bottom:22px; }
+.section-eyebrow{ font-family:'JetBrains Mono'; font-size:11.5px; color:var(--accent); letter-spacing:1px; margin-bottom:6px; }
+.section-title{ font-family:'Space Grotesk'; font-weight:700; font-size:25px; }
+.section-desc{ color:var(--muted); font-size:13.5px; margin-top:5px; max-width:520px; }
+.stats-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:26px; }
+.stat-card{ background: var(--surface); border:1px solid var(--line); border-radius:12px; padding:18px; }
+.stat-top{ display:flex; justify-content:space-between; align-items:flex-start; }
+.stat-label{ font-size:12px; color:var(--muted); }
+.stat-trend{ font-family:'JetBrains Mono'; font-size:11px; padding:2px 6px; border-radius:5px; }
+.stat-trend.up{ color:var(--success); background:var(--success-dim); }
+.stat-trend.down{ color:var(--danger); background:var(--danger-dim); }
+.stat-value{ font-family:'Space Grotesk'; font-weight:700; font-size:28px; margin-top:10px; }
+.stat-value .unit{ font-size:14px; color:var(--muted-2); font-weight:500; }
+.panel{ background:var(--surface); border:1px solid var(--line); border-radius:12px; overflow:hidden; margin-bottom:18px; }
+.panel-head{ display:flex; justify-content:space-between; align-items:center; padding:16px 18px; border-bottom:1px solid var(--line); }
+.panel-head h3{ font-family:'Space Grotesk'; font-size:15px; font-weight:600; }
+.panel-body{ padding:6px 0; }
+.row{ display:flex; align-items:center; gap:14px; padding:13px 18px; border-bottom:1px solid var(--line); }
+.row:last-child{ border-bottom:none; }
+.row:hover{ background: rgba(255,255,255,0.015); }
+.row-icon{ width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.row-main{ flex:1; min-width:0; }
+.row-title{ font-size:13.5px; font-weight:600; }
+.row-sub{ font-size:12px; color:var(--muted); margin-top:2px; }
+.row-meta{ text-align:right; font-family:'JetBrains Mono'; font-size:11.5px; color:var(--muted-2); flex-shrink:0; }
+.badge{ font-family:'JetBrains Mono'; font-size:10.5px; font-weight:500; padding:3px 9px; border-radius:20px; display:inline-block; letter-spacing:0.2px; }
+.badge.green{ color:var(--success); background:var(--success-dim); }
+.badge.red{ color:var(--danger); background:var(--danger-dim); }
+.badge.amber{ color:var(--warn); background:var(--warn-dim); }
+.badge.violet{ color:var(--violet); background:var(--violet-dim); }
+.badge.grey{ color:var(--muted); background:var(--surface-hover); }
+.btn{ font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:var(--surface-hover); color:var(--text); cursor:pointer; transition:all .12s; display:inline-flex; align-items:center; gap:6px; }
+.btn:hover{ background:#242840; }
+.btn.primary{ background:var(--accent); color:#1A1204; border-color:transparent; }
+.btn.primary:hover{ filter:brightness(1.08); }
+.btn.ghost{ background:transparent; }
+.btn.sm{ padding:6px 11px; font-size:11.5px; }
+.field{ margin-bottom:14px; }
+.field label{ display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:500; }
+.field input, .field select, .field textarea{ width:100%; background:var(--surface-hover); border:1px solid var(--line); border-radius:8px; padding:9px 12px; color:var(--text); font-family:'Inter'; font-size:13px; outline:none; }
+.field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--accent); }
+.field-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.feature-list{ display:grid; gap:10px; }
+.feature-row{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--surface); border:1px solid var(--line); border-radius:10px; }
+.feature-name{ font-weight:600; font-size:13.5px; }
+.feature-desc{ font-size:12px; color:var(--muted); margin-top:2px; }
+@media (max-width:900px){ .stats-grid{ grid-template-columns:repeat(2,1fr); } .field-row{ grid-template-columns:1fr; } .app{ flex-direction:column; } .sidebar{ width:100%; height:auto; position:relative; } }
+</style>
+</head>
+<body>
+<script>
+(async function() {
+  try {
+    const res = await fetch('/api/auth/me');
+    if (!res.ok) {
+      window.location.href = 'auth.html';
+    }
+  } catch (error) {
+    window.location.href = 'auth.html';
+  }
+})();
+</script>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">N</div>
+      <div>
+        <div class="brand-name">NEXUS</div>
+        <div class="brand-sub">v4.2 · panou bot</div>
+      </div>
+    </div>
+
+    <div class="nav-group-label">General</div>
+    <div class="nav-item active" data-target="overview"><span class="ic">◆</span>Prezentare generală</div>
+
+    <div class="nav-group-label">Comunitate</div>
+    <div class="nav-item" data-target="giveaways"><span class="ic">🎁</span>Giveaway-uri<span class="badge" id="nav-gw-badge">3</span></div>
+    <div class="nav-item" data-target="tickets"><span class="ic">🎫</span>Tichete<span class="badge" id="nav-tk-badge">5</span></div>
+    <div class="nav-item" data-target="staff"><span class="ic">🧑</span>Staff Apply</div>
+    <div class="nav-item" data-target="leveling"><span class="ic">⬆</span>Nivele & XP</div>
+
+    <div class="nav-group-label">Securitate</div>
+    <div class="nav-item" data-target="moderation"><span class="ic">🛡</span>Moderare</div>
+    <div class="nav-item" data-target="antiraid"><span class="ic">⚠</span>Anti-Raid</div>
+    <div class="nav-item" data-target="welcome"><span class="ic">👋</span>Bun venit</div>
+    <div class="nav-item" data-target="selfroles"><span class="ic">🎭</span>Selfroles</div>
+    <div class="nav-item" data-target="verification"><span class="ic">🧪</span>Verification</div>
+    <div class="nav-item" data-target="messageserver"><span class="ic">💬</span>Message Server</div>
+    <div class="nav-item" data-target="automations"><span class="ic">⚙</span>Automations</div>
+    <div class="nav-item" data-target="webhooks"><span class="ic">🔗</span>Webhooks</div>
+    <div class="nav-item" data-target="music"><span class="ic">🎵</span>Music</div>
+    <div class="nav-item" data-target="economy"><span class="ic">💰</span>Economy</div>
+    <div class="nav-item" data-target="autorole"><span class="ic">🤖</span>Autorole</div>
+    <div class="nav-item" data-target="reactionroles"><span class="ic">⚡</span>Reaction Roles</div>
+    <div class="nav-item" data-target="voice"><span class="ic">🔊</span>Voice Channels</div>
+    <div class="nav-item" data-target="backup"><span class="ic">🗂</span>Backup</div>
+    <div class="nav-item" data-target="logs"><span class="ic">🧾</span>Loguri</div>
+    <div class="nav-item" data-target="settings"><span class="ic">⚙</span>Setări</div>
+
+    <div class="sidebar-foot">
+      <div class="pulse-dot"></div>
+      <div class="sidebar-foot-text"><b>Bot online</b><br>Configurație live și actualizări în timp real</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Prezentare generală <span class="cmd">/dashboard overview</span></div>
+      <div class="topbar-right">
+        <div class="heartbeat">
+          <svg width="48" height="16" viewBox="0 0 48 16" aria-hidden="true">
+            <path class="hb-line" d="M0 8 H8 L12 4 L18 12 L24 6 L30 10 L38 4 L48 8"></path>
+          </svg>
+          <div class="heartbeat-label" id="sync-label"><b>Live</b> 24/7</div>
+        </div>
+        <button class="btn ghost" id="refresh-btn">Refresh</button>
+        <div class="avatar">N</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <section class="section active" data-section="overview">
+        <div class="section-head">
+          <div class="section-eyebrow">Overview</div>
+          <div class="section-title">Panou complet pentru bot</div>
+          <div class="section-desc">Vezi rapid modulele active, evenimentele recente și starea generală a serverului.</div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-top"><div class="stat-label">Membri</div><div class="stat-trend up">+3.1%</div></div><div class="stat-value" id="stat-members-value">--</div></div>
+          <div class="stat-card"><div class="stat-top"><div class="stat-label">Tichete</div><div class="stat-trend up">+5</div></div><div class="stat-value" id="stat-tickets-value">--</div></div>
+          <div class="stat-card"><div class="stat-top"><div class="stat-label">Giveaway-uri</div><div class="stat-trend up">live</div></div><div class="stat-value" id="stat-giveaways-value">--</div></div>
+          <div class="stat-card"><div class="stat-top"><div class="stat-label">Securitate</div><div class="stat-trend up">97%</div></div><div class="stat-value" id="stat-security-value">--</div></div>
+        </div>
+        <div class="panel"><div class="panel-head"><h3>Module active</h3></div><div class="panel-body" id="overview-modules"></div></div>
+        <div class="panel"><div class="panel-head"><h3>Activitate recentă</h3></div><div class="panel-body" id="overview-feed"></div></div>
+      </section>
+
+      <section class="section" data-section="giveaways">
+        <div class="section-head"><div class="section-eyebrow">Community</div><div class="section-title">Giveaway-uri</div><div class="section-desc">Administrează evenimentele active și cele încheiate dintr-un singur loc.</div></div>
+        <div class="panel"><div class="panel-head"><h3>Listă giveaway-uri</h3><button class="btn primary">+ Creează</button></div><div class="panel-body" id="giveaway-list"></div></div>
+      </section>
+
+      <section class="section" data-section="tickets">
+        <div class="section-head"><div class="section-eyebrow">Community</div><div class="section-title">Tichete</div><div class="section-desc">Urmărește cererile de suport și prioritatea lor.</div></div>
+        <div class="panel"><div class="panel-head"><h3>Tichete deschise</h3></div><div class="panel-body" id="tickets-list"></div></div>
+      </section>
+
+      <section class="section" data-section="staff">
+        <div class="section-head"><div class="section-eyebrow">Recruitment</div><div class="section-title">Staff Apply</div><div class="section-desc">Revizuiește cererile pentru moderatori și helperi.</div></div>
+        <div class="panel"><div class="panel-head"><h3>Cereri primite</h3></div><div class="panel-body" id="staff-list"></div></div>
+      </section>
+
+      <section class="section" data-section="leveling">
+        <div class="section-head"><div class="section-eyebrow">Progress</div><div class="section-title">Nivele & XP</div><div class="section-desc">Urmărește topul utilizatorilor și progresul XP-ului.</div></div>
+        <div class="panel"><div class="panel-head"><h3>Top utilizatori</h3></div><div class="panel-body" id="leaderboard-list"></div></div>
+      </section>
+
+      <section class="section" data-section="moderation">
+        <div class="section-head"><div class="section-eyebrow">Security</div><div class="section-title">Moderare</div><div class="section-desc">Vizualizează acțiunile recente de moderare și regulile active.</div></div>
+        <div class="panel"><div class="panel-head"><h3>Jurnal moderare</h3></div><div class="panel-body" id="modlog-list"></div></div>
+      </section>
+
+      <section class="section" data-section="antiraid">
+        <div class="section-head"><div class="section-eyebrow">Security</div><div class="section-title">Anti-Raid</div><div class="section-desc">Protecție automată pentru evenimente suspecte și activități anormale.</div></div>
+        <div class="panel"><div class="panel-head"><h3>Evenimente recente</h3></div><div class="panel-body" id="raid-list"></div></div>
+      </section>
+
+      <section class="section" data-section="welcome">
+        <div class="section-head"><div class="section-eyebrow">Bots</div><div class="section-title">Bun venit & Rămas bun</div><div class="section-desc">Configurează mesajele și rolurile oferite automat nouă-veniților.</div></div>
+        <div class="panel"><div class="panel-head"><h3>Module welcome</h3></div><div class="panel-body" id="welcome-list"></div></div>
+      </section>
+
+      <section class="section" data-section="selfroles">
+        <div class="section-head"><div class="section-eyebrow">Bots</div><div class="section-title">Selfroles</div><div class="section-desc">Gestionează rolurile pe care utilizatorii le pot alege singuri.</div></div>
+        <div class="panel"><div class="panel-head"><h3>Grupuri selfrole</h3></div><div class="panel-body" id="selfroles-list"></div></div>
+      </section>
+
+      <section class="section" data-section="music">
+        <div class="section-head"><div class="section-eyebrow">Media</div><div class="section-title">Music</div><div class="section-desc">Controlează player-ul, playlist-ul și modul de redare dintr-un singur panou.</div></div>
+        <div class="panel">
+          <div class="panel-head"><h3>Player live</h3><span class="badge green">playing</span></div>
+          <div class="panel-body" style="padding:18px;">
+            <div class="feature-row" style="margin-bottom:12px;">
+              <div>
+                <div class="feature-name" id="music-track-name">Midnight City</div>
+                <div class="feature-desc" id="music-track-meta">DJ Sora · 03:42</div>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button class="btn">⏮</button>
+                <button class="btn primary">⏯</button>
+                <button class="btn">⏭</button>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Canal music</label><input value="#muzica"></div>
+              <div class="field"><label>DJ role</label><input value="DJ, Moderator"></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Volum</label><input value="68%"></div>
+              <div class="field"><label>Mod redare</label><select><option>Loop</option><option>Shuffle</option><option>Normal</option></select></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel"><div class="panel-head"><h3>Queue și playlist</h3></div><div class="panel-body" id="music-list"></div></div>
+      </section>
+
+      <section class="section" data-section="economy">
+        <div class="section-head"><div class="section-eyebrow">Economy</div><div class="section-title">Economy</div><div class="section-desc">Administrează moneda, recompensele zilnice și itemele din shop.</div></div>
+        <div class="panel"><div class="panel-head"><h3>Shop și recompense</h3></div><div class="panel-body" id="economy-list"></div></div>
+      </section>
+
+      <section class="section" data-section="autorole">
+        <div class="section-head"><div class="section-eyebrow">Automat</div><div class="section-title">Autorole</div><div class="section-desc">Roluri oferite automat la intrare sau la anumite acțiuni.</div></div>
+        <div class="panel"><div class="panel-head"><h3>Reguli autorole</h3></div><div class="panel-body" id="autorole-list"></div></div>
+      </section>
+
+      <section class="section" data-section="reactionroles">
+        <div class="section-head"><div class="section-eyebrow">Interaction</div><div class="section-title">Reaction Roles</div><div class="section-desc">Roluri prin reacții și meniuri interactive.</div></div>
+        <div class="panel"><div class="panel-head"><h3>Grupuri de roluri</h3></div><div class="panel-body" id="reactionroles-list"></div></div>
+      </section>
+
+      <section class="section" data-section="voice">
+        <div class="section-head"><div class="section-eyebrow">Voice</div><div class="section-title">Voice Channels</div><div class="section-desc">Canale vocale temporare, limite și reguli de organizare.</div></div>
+        <div class="panel"><div class="panel-head"><h3>Canale vocale</h3></div><div class="panel-body" id="voice-list"></div></div>
+      </section>
+
+      <section class="section" data-section="backup">
+        <div class="section-head"><div class="section-eyebrow">System</div><div class="section-title">Backup</div><div class="section-desc">Backupuri pentru configurări și restaurare rapidă.</div></div>
+        <div class="panel"><div class="panel-head"><h3>Istoric backup</h3></div><div class="panel-body" id="backup-list"></div></div>
+      </section>
+
+      <section class="section" data-section="verification">
+        <div class="section-head"><div class="section-eyebrow">Security</div><div class="section-title">Verification</div><div class="section-desc">Reguli de verificare cu captcha, roluri și verificare automată a utilizatorilor.</div></div>
+        <div class="panel"><div class="panel-head"><h3>Reguli de verificare</h3></div><div class="panel-body" id="verification-list"></div></div>
+      </section>
+
+      <section class="section" data-section="messageserver">
+        <div class="section-head"><div class="section-eyebrow">Bot</div><div class="section-title">Message Server</div><div class="section-desc">Trimite și urmărește mesajele botului către server, canal și utilizatori.</div></div>
+        <div class="panel">
+          <div class="panel-head"><h3>Mesaj bot live</h3><span class="badge green">sent</span></div>
+          <div class="panel-body" style="padding:18px;">
+            <div class="feature-row" style="margin-bottom:12px;">
+              <div>
+                <div class="feature-name" id="message-server-title">Salutare automată</div>
+                <div class="feature-desc" id="message-server-body">Bun venit pe server! Folosește /help pentru comenzi.</div>
+              </div>
+              <button class="btn primary">Trimite mesaj</button>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Canal</label><input value="#general"></div>
+              <div class="field"><label>Tip mesaj</label><select><option>Welcome</option><option>Alert</option><option>Info</option></select></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel"><div class="panel-head"><h3>Istoric mesaje</h3></div><div class="panel-body" id="messageserver-list"></div></div>
+      </section>
+
+      <section class="section" data-section="automations">
+        <div class="section-head"><div class="section-eyebrow">Automation</div><div class="section-title">Automations</div><div class="section-desc">Automatizări pentru moderare, răspunsuri și evenimente repetitive.</div></div>
+        <div class="panel"><div class="panel-head"><h3>Rule set</h3></div><div class="panel-body" id="automations-list"></div></div>
+      </section>
+
+      <section class="section" data-section="webhooks">
+        <div class="section-head"><div class="section-eyebrow">Integrations</div><div class="section-title">Webhooks</div><div class="section-desc">Conectează notificările către Discord, logging, report-uri și servicii externe.</div></div>
+        <div class="panel"><div class="panel-head"><h3>Destinații webhook</h3></div><div class="panel-body" id="webhooks-list"></div></div>
+      </section>
+
+      <section class="section" data-section="logs">
+        <div class="section-head"><div class="section-eyebrow">Audit</div><div class="section-title">Loguri</div><div class="section-desc">Verifică acțiunile utilizatorilor, adminilor și sistemului.</div></div>
+        <div class="panel"><div class="panel-head"><h3>Feed loguri</h3></div><div class="panel-body" id="logs-feed"></div></div>
+      </section>
+
+      <section class="section" data-section="settings">
+        <div class="section-head"><div class="section-eyebrow">System</div><div class="section-title">Setări</div><div class="section-desc">Setările de bază pentru bot și modulul de control.</div></div>
+        <div class="panel"><div class="panel-head"><h3>Setări rapide</h3></div><div class="panel-body" style="padding:18px;">
+          <div class="field-row">
+            <div class="field"><label>Nume bot</label><input value="NEXUS Bot"></div>
+            <div class="field"><label>Prefix</label><input value="!"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Limba</label><select><option>RO</option><option>EN</option></select></div>
+            <div class="field"><label>Modul implicit</label><select><option>Overview</option><option>Moderation</option></select></div>
+          </div>
+          <button class="btn primary">Salvează</button>
+        </div></div>
+      </section>
+    </div>
+  </main>
+</div>
+<script>
+const API_BASE = 'http://127.0.0.1:3001';
+const titles = {
+  overview:['Prezentare generală','/dashboard overview'],
+  giveaways:['Giveaway-uri','/dashboard giveaways'],
+  tickets:['Tichete','/dashboard tickets'],
+  staff:['Staff Apply','/dashboard staff-apply'],
+  leveling:['Nivele & XP','/dashboard leveling'],
+  moderation:['Moderare','/dashboard moderation'],
+  antiraid:['Anti-Raid','/dashboard antiraid'],
+  welcome:['Bun venit & Rămas bun','/dashboard welcome'],
+  selfroles:['Selfroles','/dashboard selfroles'],
+  verification:['Verification','/dashboard verification'],
+  messageserver:['Message Server','/dashboard message-server'],
+  automations:['Automations','/dashboard automations'],
+  webhooks:['Webhooks','/dashboard webhooks'],
+  music:['Music','/dashboard music'],
+  economy:['Economy','/dashboard economy'],
+  autorole:['Autorole','/dashboard autorole'],
+  reactionroles:['Reaction Roles','/dashboard reaction-roles'],
+  voice:['Voice Channels','/dashboard voice'],
+  backup:['Backup','/dashboard backup'],
+  logs:['Loguri','/dashboard logs'],
+  settings:['Setări','/dashboard settings']
+};
+let state = null;
+
+function renderOverview(){
+  if (!state) return;
+  const stats = state.overview && state.overview.stats ? state.overview.stats : {};
+  const modules = state.overview.modules || [];
+  document.getElementById('stat-members-value').textContent = stats.members || '--';
+  document.getElementById('stat-tickets-value').textContent = stats.tickets ?? '--';
+  document.getElementById('stat-giveaways-value').textContent = stats.giveaways ?? '--';
+  document.getElementById('stat-security-value').textContent = stats.security || '--';
+  document.getElementById('overview-modules').innerHTML = '<div class="feature-list">' + modules.map(m => '<div class="feature-row"><div><div class="feature-name">' + m + '</div><div class="feature-desc">Modul disponibil și gata în panou</div></div><span class="badge green">online</span></div>').join('') + '</div>';
+  document.getElementById('overview-feed').innerHTML = (state.logs || []).map(item => '<div class="row"><div class="row-icon" style="background:' + (item.type === 'green' ? 'var(--success-dim)' : item.type === 'amber' ? 'var(--warn-dim)' : item.type === 'violet' ? 'var(--violet-dim)' : 'var(--surface-hover)') + '">•</div><div class="row-main"><div class="row-title">' + item.text + '</div><div class="row-sub">' + item.time + '</div></div></div>').join('');
+}
+function renderGiveaways(){
+  if (!state) return;
+  document.getElementById('giveaway-list').innerHTML = (state.giveaways || []).map(g => '<div class="row"><div class="row-main"><div class="row-title">' + g.prize + '</div><div class="row-sub">' + g.channel + ' · ' + g.entries + ' intrări</div></div><div class="row-meta"><span class="badge ' + (g.status === 'activ' ? 'green' : 'grey') + '">' + g.status + '</span><div style="margin-top:6px;">' + g.ends + '</div></div></div>').join('');
+}
+function renderTickets(){
+  if (!state) return;
+  document.getElementById('tickets-list').innerHTML = (state.tickets || []).map(t => '<div class="row"><div class="row-main"><div class="row-title">' + t.subject + '</div><div class="row-sub">' + t.user + ' · ' + t.id + '</div></div><div class="row-meta"><span class="badge ' + (t.status === 'open' ? 'amber' : 'violet') + '">' + t.status + '</span></div></div>').join('');
+}
+function renderStaff(){
+  if (!state) return;
+  document.getElementById('staff-list').innerHTML = (state.staff || []).map(s => '<div class="row"><div class="row-main"><div class="row-title">' + s.user + '</div><div class="row-sub">' + s.role + ' · ' + s.note + '</div></div><div class="row-meta"><span class="badge ' + (s.status === 'accepted' ? 'green' : 'amber') + '">' + s.status + '</span></div></div>').join('');
+}
+function renderLeveling(){
+  if (!state) return;
+  document.getElementById('leaderboard-list').innerHTML = (state.leaderboard || []).map(l => '<div class="row"><div class="rank-num top">' + l.rank + '</div><div class="row-main"><div class="row-title">' + l.user + '</div><div class="row-sub">Nivel ' + l.level + ' · XP ' + l.xp + '</div></div><div class="row-meta">' + (l.rank === 1 ? '<span class="badge violet">Top</span>' : '<span class="badge grey">In curs</span>') + '</div></div>').join('');
+}
+function renderModeration(){
+  if (!state) return;
+  document.getElementById('modlog-list').innerHTML = (state.moderation || []).map(m => '<div class="row"><div class="row-main"><div class="row-title">' + m.action + ' · ' + m.user + '</div><div class="row-sub">Mod: ' + m.mod + ' · ' + m.reason + '</div></div><div class="row-meta">' + m.time + '</div></div>').join('');
+}
+function renderRaid(){
+  if (!state) return;
+  document.getElementById('raid-list').innerHTML = (state.raids || []).map(r => '<div class="row"><div class="row-icon" style="background:' + (r.type === 'red' ? 'var(--danger-dim)' : r.type === 'amber' ? 'var(--warn-dim)' : 'var(--surface-hover)') + '">!</div><div class="row-main"><div class="row-title">' + r.text + '</div><div class="row-sub">' + r.time + '</div></div></div>').join('');
+}
+function renderWelcome(){
+  if (!state) return;
+  document.getElementById('welcome-list').innerHTML = (state.welcome || []).map(m => '<div class="feature-row"><div><div class="feature-name">' + m.name + '</div><div class="feature-desc">' + m.desc + '</div></div><span class="badge ' + (m.on ? 'green' : 'grey') + '">' + (m.on ? 'activ' : 'inactiv') + '</span></div>').join('');
+}
+function renderSelfRoles(){
+  if (!state) return;
+  document.getElementById('selfroles-list').innerHTML = (state.selfroles || []).map(s => '<div class="feature-row"><div><div class="feature-name">' + s.name + '</div><div class="feature-desc">Roluri: ' + s.roles + ' · ' + s.mode + '</div></div><span class="badge violet">ready</span></div>').join('');
+}
+function renderMusic(){
+  if (!state) return;
+  document.getElementById('music-list').innerHTML = (state.music || []).map(item => '<div class="feature-row"><div><div class="feature-name">' + item.name + '</div><div class="feature-desc">' + item.value + '</div></div><span class="badge violet">ready</span></div>').join('');
+}
+function renderEconomy(){
+  if (!state) return;
+  document.getElementById('economy-list').innerHTML = (state.economy || []).map(item => '<div class="feature-row"><div><div class="feature-name">' + item.name + '</div><div class="feature-desc">' + item.value + '</div></div><span class="badge green">live</span></div>').join('');
+}
+function renderAutorole(){
+  if (!state) return;
+  document.getElementById('autorole-list').innerHTML = (state.autorole || []).map(item => '<div class="feature-row"><div><div class="feature-name">' + item.name + '</div><div class="feature-desc">' + item.value + '</div></div><span class="badge amber">auto</span></div>').join('');
+}
+function renderReactionRoles(){
+  if (!state) return;
+  document.getElementById('reactionroles-list').innerHTML = (state.reactionroles || []).map(item => '<div class="feature-row"><div><div class="feature-name">' + item.name + '</div><div class="feature-desc">' + item.value + '</div></div><span class="badge violet">interactive</span></div>').join('');
+}
+function renderVoice(){
+  if (!state) return;
+  document.getElementById('voice-list').innerHTML = (state.voice || []).map(item => '<div class="feature-row"><div><div class="feature-name">' + item.name + '</div><div class="feature-desc">' + item.value + '</div></div><span class="badge grey">set</span></div>').join('');
+}
+function renderBackup(){
+  if (!state) return;
+  document.getElementById('backup-list').innerHTML = (state.backup || []).map(item => '<div class="feature-row"><div><div class="feature-name">' + item.name + '</div><div class="feature-desc">' + item.value + '</div></div><span class="badge green">saved</span></div>').join('');
+}
+function renderVerification(){
+  if (!state) return;
+  document.getElementById('verification-list').innerHTML = (state.verification || []).map(item => '<div class="feature-row"><div><div class="feature-name">' + item.name + '</div><div class="feature-desc">' + item.value + '</div></div><span class="badge violet">on</span></div>').join('');
+}
+function renderMessageServer(){
+  document.getElementById('messageserver-list').innerHTML = messageServerLog.map(item => '<div class="feature-row"><div><div class="feature-name">' + item.name + '</div><div class="feature-desc">' + item.value + '</div></div><span class="badge green">ok</span></div>').join('');
+}
+function renderAutomations(){
+  if (!state) return;
+  document.getElementById('automations-list').innerHTML = (state.automations || []).map(item => '<div class="feature-row"><div><div class="feature-name">' + item.name + '</div><div class="feature-desc">' + item.value + '</div></div><span class="badge amber">rule</span></div>').join('');
+}
+function renderWebhooks(){
+  if (!state) return;
+  document.getElementById('webhooks-list').innerHTML = (state.webhooks || []).map(item => '<div class="feature-row"><div><div class="feature-name">' + item.name + '</div><div class="feature-desc">' + item.value + '</div></div><span class="badge green">linked</span></div>').join('');
+}
+function renderLogs(){
+  if (!state) return;
+  document.getElementById('logs-feed').innerHTML = (state.logs || []).map(item => '<div class="row"><div class="row-icon" style="background:' + (item.type === 'green' ? 'var(--success-dim)' : item.type === 'amber' ? 'var(--warn-dim)' : item.type === 'violet' ? 'var(--violet-dim)' : 'var(--surface-hover)') + '">•</div><div class="row-main"><div class="row-title">' + item.text + '</div><div class="row-sub">' + item.time + '</div></div></div>').join('');
+}
+function renderDashboard(data){
+  state = data;
+  document.getElementById('sync-label').innerHTML = '<b>' + (data.status && data.status.botOnline ? 'Live' : 'Offline') + '</b> ' + (data.status && data.status.lastSync ? new Date(data.status.lastSync).toLocaleTimeString('ro-RO') : 'n/a');
+  renderOverview(); renderGiveaways(); renderTickets(); renderStaff(); renderLeveling(); renderModeration(); renderRaid(); renderWelcome(); renderSelfRoles(); renderVerification(); renderMessageServer(); renderAutomations(); renderWebhooks(); renderMusic(); renderEconomy(); renderAutorole(); renderReactionRoles(); renderVoice(); renderBackup(); renderLogs();
+}
+async function loadDashboard(){
+  try {
+    const res = await fetch(API_BASE + '/api/dashboard');
+    const data = await res.json();
+    renderDashboard(data);
+  } catch (error) {
+    console.error('Dashboard API unavailable', error);
+    document.getElementById('sync-label').innerHTML = '<b>Offline</b> API unavailable';
+  }
+}
+function setActiveSection(name){
+  document.querySelectorAll('.nav-item').forEach(item => item.classList.toggle('active', item.dataset.target === name));
+  document.querySelectorAll('.section').forEach(sec => sec.classList.toggle('active', sec.dataset.section === name));
+  document.getElementById('topbar-title').innerHTML = titles[name][0] + ' <span class="cmd">' + titles[name][1] + '</span>';
+}
+document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', () => setActiveSection(item.dataset.target)));
+document.getElementById('refresh-btn').addEventListener('click', loadDashboard);
+setInterval(loadDashboard, 10000);
+loadDashboard();
+</script>
+</body>
+</html>
