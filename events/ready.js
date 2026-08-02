@@ -2,14 +2,13 @@
 const db = require('../utils/database');
 const { cacheInvites } = require('../utils/inviteTracker');
 const cron = require('node-cron');
-const chalk = require('chalk');
 const jarvisVoice = require('../utils/jarvisVoiceAssistant');
 
 module.exports = {
   name: 'clientReady',
   once: true,
   async execute(client) {
-    console.log(chalk.green(`✅ ${client.user.tag} este online!`));
+    console.log(`✅ ${client.user.tag} este online!`);
 
     // Cache invites for all guilds
     for (const guild of client.guilds.cache.values()) {
@@ -21,7 +20,7 @@ module.exports = {
     const { endGiveaway } = require('../utils/giveawayHandler');
 
     if (typeof endGiveaway !== 'function') {
-      console.warn(chalk.yellow('[Giveaway] endGiveaway nu este exportat; giveaway scheduler sarit.'));
+      console.warn('[Giveaway] endGiveaway nu este exportat; giveaway scheduler sarit.');
     } else {
       for (const [msgId, g] of Object.entries(giveaways)) {
         if (!g.ended) {
@@ -61,16 +60,16 @@ module.exports = {
             : voiceChannel.guild.systemChannel;
 
           await jarvisVoice.join(voiceChannel, textChannel, { client });
-          console.log(chalk.green(`[Jarvis VC] Auto-join activ in ${voiceChannel.name}`));
+          console.log(`[Jarvis VC] Auto-join activ in ${voiceChannel.name}`);
         } catch (err) {
-          console.error(chalk.red('[Jarvis VC] Auto-join failed:'), err);
+          console.error('[Jarvis VC] Auto-join failed:', err);
         }
       }, Number(process.env.JARVIS_VOICE_AUTO_JOIN_DELAY_MS || 8000));
     }
 
     // Stats Update Loop (folosind node-cron pentru precizie)
     cron.schedule('*/10 * * * *', async () => {
-      console.log(chalk.blue('[Stats] Se actualizează canalele de statistici...'));
+      console.log('[Stats] Se actualizează canalele de statistici...');
       for (const [guildId, config] of Object.entries(db.getAll('server_stats') || {})) {
         const guild = client.guilds.cache.get(guildId);
         if (!guild) continue;
@@ -92,7 +91,7 @@ module.exports = {
             }
           }
         } catch (err) {
-          console.error(chalk.red(`[Stats Update Error] Guild: ${guildId}`), err);
+          console.error(`[Stats Update Error] Guild: ${guildId}`, err);
         }
       }
     });
