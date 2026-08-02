@@ -1,83 +1,1026 @@
 <!DOCTYPE html>
 <html lang="ro">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Phoenix Dashboard v2.4.3</title>
-    <link rel="stylesheet" href="index.css" />
-  </head>
-  <body>
-    <div class="app">
-      <div class="topbar">
-        <div>
-          <h1>Phoenix Dashboard <span class="version-badge">BSH 2.4.3</span></h1>
-          <p>Panou real pentru botul Discord și setările serverului</p>
-        </div>
-        <div class="topbar-actions">
-          <div id="authCard" class="auth-card">
-            <div class="auth-avatar" id="authAvatar">?</div>
-            <div>
-              <div id="authUser">Neautentificat</div>
-              <div id="authRole" class="muted">Rol: vizitator</div>
-            </div>
-          </div>
-          <button onclick="loginWithDiscord()" id="loginBtn">Autentifică-te cu Discord</button>
-          <button onclick="logout()" id="logoutBtn" class="button-danger" style="display:none;">Logout</button>
-          <button onclick="saveConfig()" id="saveBtn">Salvează</button>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOKI // Panou de control bot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#131419;
+  --bg-grain: radial-gradient(circle at 50% 0%, #191b22 0%, #101116 65%);
+  --panel:#1b1d25;
+  --panel-2:#20222b;
+  --panel-3:#25272f;
+  --border:#2d303b;
+  --border-soft:#25272f;
+  --text:#eae7e0;
+  --text-dim:#8c8e9c;
+  --text-faint:#5b5d69;
+  --amber:#ffb454;
+  --amber-dim:#7a5a2c;
+  --cyan:#5eead4;
+  --cyan-dim:#2c5852;
+  --red:#ff6b6b;
+  --red-dim:#5c2e2e;
+  --violet:#b39ffb;
+  --radius:14px;
+  --font-display:'Space Grotesk', sans-serif;
+  --font-body:'Inter', sans-serif;
+  --font-mono:'JetBrains Mono', monospace;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{
+  background:var(--bg-grain), var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--amber); color:#1a1a1a;}
+::-webkit-scrollbar{width:10px; height:10px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--panel-3); border-radius:8px; border:2px solid var(--bg);}
+
+/* ---------- layout shell ---------- */
+.shell{
+  display:grid;
+  grid-template-columns:248px 1fr;
+  min-height:100vh;
+}
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr;}
+  .sidebar{position:fixed; z-index:50; height:100vh; transform:translateX(-100%); transition:transform .25s ease;}
+  .sidebar.open{transform:translateX(0);}
+  .mobile-toggle{display:flex !important;}
+}
+
+/* ---------- sidebar ---------- */
+.sidebar{
+  background:linear-gradient(180deg, #191a20 0%, #15161b 100%);
+  border-right:1px solid var(--border);
+  padding:22px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:26px;
+}
+.brand{
+  display:flex; align-items:center; gap:12px;
+  padding:4px 6px 18px 6px;
+  border-bottom:1px solid var(--border-soft);
+}
+.brand-mark{
+  width:38px; height:38px; border-radius:10px;
+  background:linear-gradient(145deg, #2a2c36, #1c1e26);
+  border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 0 0 1px rgba(0,0,0,.3);
+  position:relative;
+}
+.brand-mark::after{
+  content:''; position:absolute; inset:0; border-radius:10px;
+  box-shadow: 0 0 14px rgba(255,180,84,.35);
+  opacity:.8;
+}
+.brand-mark svg{width:20px; height:20px; position:relative; z-index:1;}
+.brand-text .name{font-family:var(--font-display); font-weight:700; font-size:15px; letter-spacing:.3px;}
+.brand-text .sub{font-family:var(--font-mono); font-size:10px; color:var(--text-faint); letter-spacing:1px; text-transform:uppercase; margin-top:2px;}
+
+.server-picker{
+  display:flex; align-items:center; gap:10px;
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:10px; padding:9px 10px; cursor:pointer;
+  transition:border-color .15s;
+}
+.server-picker:hover{border-color:#3a3d4a;}
+.server-picker .avatar{
+  width:26px; height:26px; border-radius:7px;
+  background:linear-gradient(135deg, var(--amber), #d98f3a);
+  flex-shrink:0;
+}
+.server-picker .info{flex:1; min-width:0;}
+.server-picker .info .n{font-size:12.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.server-picker .info .m{font-family:var(--font-mono); font-size:10px; color:var(--text-faint);}
+.server-picker .chev{color:var(--text-faint); font-size:10px;}
+
+nav.navlist{display:flex; flex-direction:column; gap:2px;}
+.nav-label{font-family:var(--font-mono); font-size:10px; letter-spacing:1.5px; color:var(--text-faint); text-transform:uppercase; padding:10px 10px 6px;}
+.nav-item{
+  display:flex; align-items:center; gap:11px;
+  padding:9px 10px; border-radius:9px;
+  color:var(--text-dim); text-decoration:none;
+  font-size:13px; font-weight:500;
+  position:relative;
+  transition:background .15s, color .15s;
+}
+.nav-item svg{width:16px; height:16px; opacity:.8; flex-shrink:0;}
+.nav-item:hover{background:var(--panel); color:var(--text);}
+.nav-item.active{background:var(--panel-2); color:var(--text);}
+.nav-item.active::before{
+  content:''; position:absolute; left:-16px; top:50%; transform:translateY(-50%);
+  width:3px; height:16px; border-radius:3px; background:var(--amber);
+  box-shadow:0 0 8px rgba(255,180,84,.6);
+}
+.nav-badge{margin-left:auto; font-family:var(--font-mono); font-size:9.5px; background:var(--red-dim); color:#ffb3b3; padding:1px 6px; border-radius:20px;}
+
+.sidebar-foot{margin-top:auto; padding-top:16px; border-top:1px solid var(--border-soft); display:flex; align-items:center; gap:10px;}
+.sidebar-foot .dot{width:8px; height:8px; border-radius:50%; background:var(--cyan); box-shadow:0 0 8px rgba(94,234,212,.7);}
+.sidebar-foot .txt{font-family:var(--font-mono); font-size:10.5px; color:var(--text-dim);}
+
+/* ---------- main ---------- */
+.main{padding:22px 28px 60px; max-width:1400px; width:100%;}
+.topbar{
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  margin-bottom:26px; flex-wrap:wrap;
+}
+.mobile-toggle{
+  display:none; width:38px; height:38px; border-radius:9px; background:var(--panel);
+  border:1px solid var(--border); color:var(--text); align-items:center; justify-content:center; cursor:pointer;
+}
+.topbar-title h1{font-family:var(--font-display); font-size:21px; font-weight:700; letter-spacing:.2px;}
+.topbar-title p{font-size:12.5px; color:var(--text-dim); margin-top:3px;}
+.topbar-actions{display:flex; align-items:center; gap:10px;}
+.icon-btn{
+  width:38px; height:38px; border-radius:10px; background:var(--panel); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; color:var(--text-dim); cursor:pointer; position:relative;
+  transition:color .15s, border-color .15s;
+}
+.icon-btn:hover{color:var(--text); border-color:#3a3d4a;}
+.icon-btn svg{width:16px; height:16px;}
+.icon-btn .ping{position:absolute; top:7px; right:7px; width:6px; height:6px; border-radius:50%; background:var(--amber); box-shadow:0 0 6px rgba(255,180,84,.9);}
+.user-chip{display:flex; align-items:center; gap:9px; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px 6px 6px; cursor:pointer;}
+.user-chip img,.user-chip .av{width:26px; height:26px; border-radius:7px; background:linear-gradient(135deg,var(--cyan),#2a8f7f);}
+.user-chip span{font-size:12.5px; font-weight:600;}
+
+/* status rack */
+.rack{
+  display:grid; grid-template-columns:repeat(6,1fr); gap:14px; margin-bottom:28px;
+}
+@media (max-width:1200px){.rack{grid-template-columns:repeat(3,1fr);}}
+@media (max-width:800px){.rack{grid-template-columns:repeat(2,1fr);}}
+.rack-module{
+  background:linear-gradient(160deg, var(--panel-2), var(--panel));
+  border:1px solid var(--border); border-radius:var(--radius);
+  padding:16px 16px 14px; position:relative; overflow:hidden;
+}
+.rack-module::before{
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent);
+}
+.rack-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+.rack-label{font-family:var(--font-mono); font-size:10px; letter-spacing:1px; color:var(--text-faint); text-transform:uppercase;}
+.led{width:7px; height:7px; border-radius:50%; background:var(--cyan); box-shadow:0 0 8px rgba(94,234,212,.8);}
+.led.amber{background:var(--amber); box-shadow:0 0 8px rgba(255,180,84,.8);}
+.rack-value{font-family:var(--font-mono); font-size:26px; font-weight:600; letter-spacing:.5px;}
+.rack-value span{font-size:13px; color:var(--text-faint); font-weight:400; margin-left:3px;}
+.rack-spark{margin-top:10px; height:22px;}
+.rack-delta{font-family:var(--font-mono); font-size:10.5px; color:var(--cyan); margin-top:8px;}
+.rack-delta.down{color:var(--red);}
+
+/* section heading */
+.section-head{display:flex; align-items:baseline; justify-content:space-between; margin:34px 0 14px;}
+.section-head h2{font-family:var(--font-display); font-size:15px; font-weight:600; display:flex; align-items:center; gap:9px;}
+.section-head h2::before{content:''; width:8px; height:8px; border-radius:2px; background:var(--amber); display:inline-block; transform:rotate(45deg);}
+.section-head .cnt{font-family:var(--font-mono); font-size:11px; color:var(--text-faint);}
+
+/* module grid (feature cards) */
+.grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+@media (max-width:1100px){.grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:640px){.grid{grid-template-columns:1fr;}}
+
+.module-card{
+  background:linear-gradient(160deg, #22242d 0%, #1c1e26 100%);
+  border:1px solid var(--border); border-radius:var(--radius);
+  padding:18px; position:relative; display:flex; flex-direction:column; gap:12px;
+  transition:transform .18s ease, border-color .18s ease;
+}
+.module-card:hover{transform:translateY(-2px); border-color:#3a3d4a;}
+.screw{position:absolute; width:5px; height:5px; border-radius:50%; background:#0e0f13; box-shadow:inset 0 1px 1px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.03);}
+.screw.tl{top:9px; left:9px;} .screw.tr{top:9px; right:9px;} .screw.bl{bottom:9px; left:9px;} .screw.br{bottom:9px; right:9px;}
+
+.module-top{display:flex; align-items:center; justify-content:space-between;}
+.module-icon-wrap{display:flex; align-items:center; gap:11px;}
+.module-icon{
+  width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+  background:var(--panel); border:1px solid var(--border);
+}
+.module-icon svg{width:18px; height:18px;}
+.module-name{font-family:var(--font-display); font-size:14.5px; font-weight:600;}
+.module-tag{font-family:var(--font-mono); font-size:9.5px; color:var(--text-faint); text-transform:uppercase; letter-spacing:1px; margin-top:2px;}
+
+/* toggle switch */
+.switch{width:42px; height:22px; border-radius:20px; background:var(--panel); border:1px solid var(--border); position:relative; cursor:pointer; flex-shrink:0;}
+.switch::after{content:''; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:#54565f; transition:all .18s ease;}
+.switch.on{background:rgba(255,180,84,.15); border-color:var(--amber-dim);}
+.switch.on::after{left:22px; background:var(--amber); box-shadow:0 0 8px rgba(255,180,84,.7);}
+
+.module-desc{font-size:12.5px; color:var(--text-dim); line-height:1.5;}
+.module-stats{display:flex; gap:16px; padding-top:10px; border-top:1px solid var(--border-soft);}
+.mstat b{display:block; font-family:var(--font-mono); font-size:15px; font-weight:600;}
+.mstat span{font-size:10.5px; color:var(--text-faint);}
+.module-cta{
+  margin-top:auto; align-self:flex-start; font-family:var(--font-mono); font-size:11px; color:var(--amber);
+  background:none; border:none; cursor:pointer; padding:0; display:flex; align-items:center; gap:5px;
+}
+.module-cta:hover{text-decoration:underline;}
+
+/* ---- special: music player module ---- */
+.music-card{grid-column:span 1;}
+.now-playing{display:flex; gap:12px; align-items:center;}
+.album{width:52px; height:52px; border-radius:9px; background:linear-gradient(135deg,#2a2c36,#1c1e26); border:1px solid var(--border); flex-shrink:0; position:relative; overflow:hidden;}
+.album .bars{position:absolute; inset:0; display:flex; align-items:flex-end; gap:3px; padding:10px; justify-content:center;}
+.album .bars i{width:4px; background:var(--cyan); border-radius:2px; animation:eq 1s ease-in-out infinite;}
+.album .bars i:nth-child(1){height:40%; animation-delay:0s;}
+.album .bars i:nth-child(2){height:80%; animation-delay:.15s;}
+.album .bars i:nth-child(3){height:55%; animation-delay:.3s;}
+.album .bars i:nth-child(4){height:90%; animation-delay:.45s;}
+@keyframes eq{0%,100%{transform:scaleY(.5);} 50%{transform:scaleY(1);}}
+.track-info .t{font-size:13px; font-weight:600;}
+.track-info .a{font-size:11.5px; color:var(--text-faint); margin-top:2px;}
+.progress-bar{height:4px; border-radius:4px; background:var(--panel); margin-top:12px; position:relative; overflow:hidden;}
+.progress-bar i{position:absolute; left:0; top:0; bottom:0; width:38%; background:linear-gradient(90deg,var(--cyan),var(--amber)); border-radius:4px;}
+.progress-time{display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:9.5px; color:var(--text-faint); margin-top:6px;}
+
+/* leaderboard mini */
+.lb-row{display:flex; align-items:center; gap:10px; padding:6px 0;}
+.lb-rank{font-family:var(--font-mono); font-size:11px; color:var(--text-faint); width:16px;}
+.lb-rank.top{color:var(--amber);}
+.lb-av{width:24px; height:24px; border-radius:7px; background:linear-gradient(135deg,var(--violet),#6b5bb0); flex-shrink:0;}
+.lb-name{font-size:12px; font-weight:500; flex:1;}
+.lb-xp{font-family:var(--font-mono); font-size:10.5px; color:var(--text-faint);}
+
+/* welcome preview */
+.wc-preview{background:var(--panel); border:1px solid var(--border-soft); border-radius:10px; padding:12px; font-size:12px; line-height:1.5;}
+.wc-preview b{color:var(--cyan);}
+
+/* toggle list (logging) */
+.tlist{display:flex; flex-direction:column; gap:8px;}
+.trow{display:flex; align-items:center; justify-content:space-between; font-size:12px; color:var(--text-dim);}
+.tsw{width:30px; height:17px; border-radius:20px; background:var(--panel); border:1px solid var(--border); position:relative; cursor:pointer;}
+.tsw::after{content:''; position:absolute; top:1.5px; left:1.5px; width:12px; height:12px; border-radius:50%; background:#54565f; transition:.18s;}
+.tsw.on{background:rgba(94,234,212,.12); border-color:var(--cyan-dim);}
+.tsw.on::after{left:14.5px; background:var(--cyan); box-shadow:0 0 6px rgba(94,234,212,.7);}
+
+/* activity + chart row */
+.split{display:grid; grid-template-columns:1.3fr 1fr; gap:16px;}
+@media (max-width:1000px){.split{grid-template-columns:1fr;}}
+
+.console-panel{
+  background:#111217; border:1px solid var(--border); border-radius:var(--radius);
+  padding:16px 18px; font-family:var(--font-mono);
+}
+.console-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+.console-head .dots{display:flex; gap:6px;}
+.console-head .dots i{width:8px; height:8px; border-radius:50%; background:#2d303b;}
+.console-title{font-size:10.5px; letter-spacing:1px; color:var(--text-faint); text-transform:uppercase;}
+.log-line{display:flex; gap:10px; font-size:11.5px; padding:5px 0; border-bottom:1px dashed rgba(255,255,255,.04); align-items:baseline;}
+.log-line .ts{color:var(--text-faint); flex-shrink:0;}
+.log-line .tag{padding:1px 6px; border-radius:4px; font-size:9.5px; flex-shrink:0;}
+.tag.mod{background:var(--red-dim); color:#ffb3b3;}
+.tag.eco{background:#3a3320; color:var(--amber);}
+.tag.sys{background:var(--cyan-dim); color:var(--cyan);}
+.tag.lvl{background:#332a55; color:var(--violet);}
+.log-line .msg{color:#c9c8d1;}
+
+.chart-panel{background:var(--panel-2); border:1px solid var(--border); border-radius:var(--radius); padding:18px;}
+.chart-panel .th{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:16px;}
+.chart-panel h3{font-family:var(--font-display); font-size:13.5px; font-weight:600;}
+.chart-panel .sub{font-family:var(--font-mono); font-size:10px; color:var(--text-faint);}
+.bar-row{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+.bar-row .lbl{width:88px; font-size:11.5px; color:var(--text-dim); flex-shrink:0;}
+.bar-track{flex:1; height:8px; background:var(--panel); border-radius:6px; overflow:hidden;}
+.bar-fill{height:100%; border-radius:6px; background:linear-gradient(90deg, var(--cyan), var(--amber));}
+.bar-row .val{font-family:var(--font-mono); font-size:10.5px; color:var(--text-faint); width:34px; text-align:right;}
+
+/* ---------- selfroles builder ---------- */
+.sr-wrap{display:grid; grid-template-columns:1fr 380px; gap:16px;}
+@media (max-width:1050px){.sr-wrap{grid-template-columns:1fr;}}
+
+.sr-panels{display:flex; flex-direction:column; gap:10px; margin-bottom:18px;}
+.sr-panel-row{
+  display:flex; align-items:center; gap:14px;
+  background:linear-gradient(160deg, #22242d, #1c1e26);
+  border:1px solid var(--border); border-radius:12px; padding:13px 16px;
+}
+.sr-panel-row .sr-type-icon{
+  width:34px; height:34px; border-radius:9px; background:var(--panel); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.sr-panel-row .sr-type-icon svg{width:16px; height:16px;}
+.sr-panel-info{flex:1; min-width:0;}
+.sr-panel-info .n{font-size:13px; font-weight:600;}
+.sr-panel-info .m{font-family:var(--font-mono); font-size:10.5px; color:var(--text-faint); margin-top:2px;}
+.sr-panel-roles{display:flex; gap:5px; flex-wrap:wrap; max-width:220px;}
+.role-pill{
+  font-family:var(--font-mono); font-size:9.5px; padding:3px 8px; border-radius:20px;
+  border:1px solid var(--border); color:var(--text-dim); white-space:nowrap;
+  display:flex; align-items:center; gap:4px;
+}
+.role-pill i{width:6px; height:6px; border-radius:50%; display:inline-block;}
+.sr-panel-row .switch{margin-left:auto;}
+
+.builder-card{
+  background:linear-gradient(160deg, #22242d, #1c1e26);
+  border:1px solid var(--border); border-radius:var(--radius); padding:20px;
+}
+.builder-head{display:flex; align-items:center; justify-content:between; margin-bottom:16px;}
+.builder-head h3{font-family:var(--font-display); font-size:14px; font-weight:600;}
+.type-tabs{display:flex; gap:6px; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:3px; margin-bottom:18px;}
+.type-tab{flex:1; text-align:center; padding:8px 6px; font-size:11.5px; font-weight:500; color:var(--text-dim); border-radius:8px; cursor:pointer; transition:.15s;}
+.type-tab.active{background:var(--panel-3); color:var(--text); box-shadow:inset 0 0 0 1px var(--border);}
+
+.field{margin-bottom:14px;}
+.field label{display:block; font-family:var(--font-mono); font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--text-faint); margin-bottom:6px;}
+.field input[type=text], .field textarea{
+  width:100%; background:var(--panel); border:1px solid var(--border); border-radius:9px;
+  padding:9px 11px; color:var(--text); font-size:12.5px; font-family:var(--font-body); resize:vertical;
+}
+.field input[type=text]:focus, .field textarea:focus{outline:none; border-color:var(--amber-dim);}
+
+.role-row{
+  display:flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--border-soft);
+  border-radius:9px; padding:8px 10px; margin-bottom:7px;
+}
+.role-row .emoji-box{
+  width:28px; height:28px; border-radius:7px; background:var(--panel-2); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; cursor:pointer;
+}
+.role-row .role-select{
+  flex:1; background:transparent; border:none; color:var(--text); font-size:12.5px; font-family:var(--font-body);
+}
+.role-row .role-color{width:12px; height:12px; border-radius:50%; flex-shrink:0;}
+.role-row .rm-btn{
+  width:22px; height:22px; border-radius:6px; background:transparent; border:none; color:var(--text-faint);
+  cursor:pointer; font-size:14px; flex-shrink:0; transition:color .15s;
+}
+.role-row .rm-btn:hover{color:var(--red);}
+
+.add-role-btn{
+  width:100%; padding:9px; border-radius:9px; border:1px dashed var(--border); background:transparent;
+  color:var(--text-dim); font-size:12px; font-family:var(--font-mono); cursor:pointer; margin-bottom:16px;
+  transition:.15s;
+}
+.add-role-btn:hover{border-color:var(--amber-dim); color:var(--amber);}
+
+.builder-options{display:flex; flex-direction:column; gap:9px; margin-bottom:16px; padding-top:14px; border-top:1px solid var(--border-soft);}
+.opt-row{display:flex; align-items:center; justify-content:space-between; font-size:12px; color:var(--text-dim);}
+
+.btn-primary{
+  width:100%; padding:11px; border-radius:9px; border:none; cursor:pointer;
+  background:linear-gradient(135deg, var(--amber), #d98f3a); color:#20140a; font-weight:600; font-size:12.5px;
+  font-family:var(--font-body); box-shadow:0 4px 14px rgba(255,180,84,.25);
+}
+
+/* discord-style live preview */
+.sr-preview-wrap{position:sticky; top:20px; align-self:start;}
+.sr-preview-label{font-family:var(--font-mono); font-size:10px; letter-spacing:1px; color:var(--text-faint); text-transform:uppercase; margin-bottom:10px;}
+.discord-mock{
+  background:#1a1b20; border:1px solid var(--border); border-radius:12px; padding:16px;
+}
+.discord-mock .msg-head{display:flex; align-items:center; gap:9px; margin-bottom:8px;}
+.discord-mock .bot-av{width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,var(--amber),#d98f3a); flex-shrink:0;}
+.discord-mock .bot-name{font-size:13px; font-weight:600;}
+.discord-mock .bot-tag{font-family:var(--font-mono); font-size:8.5px; background:var(--amber); color:#20140a; padding:1px 5px; border-radius:4px; margin-left:6px; vertical-align:1px;}
+.discord-embed{border-left:3px solid var(--amber); background:#202127; border-radius:0 8px 8px 0; padding:12px 14px;}
+.discord-embed .et{font-size:13.5px; font-weight:600; margin-bottom:5px;}
+.discord-embed .ed{font-size:12px; color:#c9c8d1; line-height:1.5; margin-bottom:10px;}
+.embed-role-list{display:flex; flex-direction:column; gap:6px;}
+.embed-role-item{display:flex; align-items:center; gap:8px; font-size:12px; color:#c9c8d1;}
+.embed-role-item .rdot{width:8px; height:8px; border-radius:50%;}
+.embed-btn-row{display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;}
+.embed-btn{font-size:11px; padding:6px 12px; border-radius:6px; background:#2b2d34; border:1px solid #3a3d46; color:#e0dfe3; display:flex; align-items:center; gap:5px;}
+
+footer.foot{margin-top:40px; padding-top:18px; border-top:1px solid var(--border-soft); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;}
+footer.foot span{font-family:var(--font-mono); font-size:10.5px; color:var(--text-faint);}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8"><path d="M9 3h6l1 4h3v3l-2 1v6l2 1v3h-3l-1 4H9l-1-4H5v-3l2-1v-6L5 7V4h3l1-4Z" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.4"/></svg>
+      </div>
+      <div class="brand-text">
+        <div class="name">NOKI</div>
+        <div class="sub">Console v2.4.4</div>
+      </div>
+    </div>
+
+    <div class="server-picker">
+      <div class="avatar"></div>
+      <div class="info">
+        <div class="n">Vale Gaming RO</div>
+        <div class="m">4 218 membri</div>
+      </div>
+      <div class="chev">▾</div>
+    </div>
+
+    <nav class="navlist">
+      <div class="nav-label">Panou</div>
+      <a class="nav-item active" href="#overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Prezentare generală</a>
+      <a class="nav-item" href="#moderation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z"/></svg>Moderare<span class="nav-badge">3</span></a>
+      <a class="nav-item" href="#music"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>Muzică</a>
+      <a class="nav-item" href="#leveling"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V9M10 21V3M17 21v-7"/></svg>Nivele &amp; XP</a>
+      <a class="nav-item" href="#economy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9.5c0-1.4 1.3-2.5 3-2.5s3 1.1 3 2.5-1.3 2-3 2.5c-1.7.5-3 1.1-3 2.5s1.3 2.5 3 2.5 3-1.1 3-2.5"/></svg>Economie</a>
+      <a class="nav-item" href="#welcome"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z" opacity="0"/><path d="M3 12l4-4m0 0l4 4m-4-4v14"/><path d="M13 6h8M13 12h8M13 18h8"/></svg>Bun venit &amp; Roluri</a>
+      <a class="nav-item" href="#selfroles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="3.2"/><circle cx="16" cy="8" r="3.2"/><path d="M2.5 20c.7-3.2 3-5 5.5-5s4.8 1.8 5.5 5"/><path d="M12.5 20c.6-2.8 2.6-4.5 4.8-4.5 1.5 0 2.9.6 3.9 1.8"/></svg>Selfroles<span class="nav-badge">Nou</span></a>
+      <a class="nav-item" href="#logs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>Jurnal</a>
+      <a class="nav-item" href="#tickets"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V9Z"/><path d="M13 5v14" stroke-dasharray="2 3"/></svg>Bilete<span class="nav-badge">5</span></a>
+      <a class="nav-item" href="#extra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7h-3a2 2 0 0 1-2-2V2M9 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-7-7Z"/></svg>Module extra</a>
+      <div class="nav-label">Sistem</div>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h5"/></svg>Comenzi</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.7 9a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9c.2.7.7 1.2 1.5 1.4H21a2 2 0 1 1 0 4h-.1c-.8.2-1.3.7-1.5 1.6Z"/></svg>Setări</a>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="dot"></div>
+      <div class="txt">Online · 42ms latență</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</div>
+        <div class="topbar-title">
+          <h1 id="overview">Prezentare generală</h1>
+          <p>Vale Gaming RO · actualizat acum 12 secunde</p>
         </div>
       </div>
-
-      <div class="grid">
-        <div class="card"><div class="label">Membri</div><div class="value" id="members">12.4k</div></div>
-        <div class="card"><div class="label">Comenzi</div><div class="value" id="commands">4.1k</div></div>
-        <div class="card"><div class="label">Tickete</div><div class="value" id="tickets">23</div></div>
-        <div class="card"><div class="label">Securitate</div><div class="value" id="security">97%</div></div>
-      </div>
-
-      <div class="section">
-        <div class="panel">
-          <h3>Setări server</h3>
-          <div id="permissionNotice" class="notice">Nu ai permisiuni de editare. Autentifică-te ca administrator sau moderator.</div>
-          <label class="label">Nume server</label>
-          <input id="serverName" value="BSH • Discord" />
-          <label class="label">Prefix bot</label>
-          <input id="prefix" value="!" />
-          <label class="label">Canal welcome</label>
-          <input id="welcomeChannel" value="#welcome" />
-          <label class="label">Rol welcome</label>
-          <input id="welcomeRole" value="Member" />
-          <label class="label">Mesaj welcome</label>
-          <textarea id="welcomeMessage">Bun venit pe server! Citește regulile și alege rolurile potrivite.</textarea>
-          <label class="label">Dashboard API URL</label>
-          <input id="dashboardApi" value="http://localhost:3100" />
-          <div class="button-row">
-            <button style="margin-top:10px;" onclick="saveConfig()" id="applyBtn">Aplică modificările</button>
-            <button style="margin-top:10px;" class="button-secondary" onclick="resetConfig()" id="resetBtn">Reset setări</button>
-            <button style="margin-top:10px;" class="button-secondary" onclick="exportConfig()" id="exportBtn">Export JSON</button>
-          </div>
+      <div class="topbar-actions">
+        <div class="icon-btn"><span class="ping"></span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
         </div>
-
-        <div class="panel">
-          <h3>Stare conexiune</h3>
-          <div class="row-inline">
-            <span id="apiHealth" class="status-pill status-offline">offline</span>
-            <button class="button-secondary" onclick="checkApiHealth()">Verifică API</button>
-          </div>
-          <div id="lastSync" class="muted" style="margin-top:8px;">Ultima sincronizare: -</div>
-
-          <h3 style="margin-top:16px;">Control module</h3>
-          <div id="moduleControls" class="module-grid"></div>
-
-          <h3>Permisiuni disponibile</h3>
-          <div id="permissions" class="pill-row"></div>
-          <h3 style="margin-top:16px;">Moduri active</h3>
-          <div id="modules" class="pill-row"></div>
-          <h3 style="margin-top:16px;">Activitate recentă</h3>
-          <div id="activity" class="muted"></div>
+        <div class="icon-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 9h16"/></svg>
+        </div>
+        <div class="user-chip">
+          <div class="av"></div>
+          <span>andrei_mod</span>
         </div>
       </div>
     </div>
 
-    <script src="app.js"></script>
-  </body>
+    <!-- STATUS RACK -->
+    <div class="rack">
+      <div class="rack-module">
+        <div class="rack-top"><span class="rack-label">Membri online</span><span class="led"></span></div>
+        <div class="rack-value">1 284<span>/ 4 218</span></div>
+        <svg class="rack-spark" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline points="0,18 10,14 20,16 30,10 40,12 50,6 60,9 70,4 80,8 90,3 100,5" fill="none" stroke="var(--cyan)" stroke-width="1.6"/></svg>
+        <div class="rack-delta">▲ 6.2% față de ieri</div>
+      </div>
+      <div class="rack-module">
+        <div class="rack-top"><span class="rack-label">Comenzi azi</span><span class="led amber"></span></div>
+        <div class="rack-value">3 902</div>
+        <svg class="rack-spark" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline points="0,10 10,12 20,7 30,9 40,4 50,8 60,5 70,11 80,6 90,9 100,4" fill="none" stroke="var(--amber)" stroke-width="1.6"/></svg>
+        <div class="rack-delta">▲ 12% față de ieri</div>
+      </div>
+      <div class="rack-module">
+        <div class="rack-top"><span class="rack-label">Uptime</span><span class="led"></span></div>
+        <div class="rack-value">99.98<span>%</span></div>
+        <svg class="rack-spark" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline points="0,4 10,4 20,4 30,4 40,4 50,9 60,4 70,4 80,4 90,4 100,4" fill="none" stroke="var(--cyan)" stroke-width="1.6"/></svg>
+        <div class="rack-delta">21 zile fără restart</div>
+      </div>
+      <div class="rack-module">
+        <div class="rack-top"><span class="rack-label">Acțiuni mod.</span><span class="led amber"></span></div>
+        <div class="rack-value">17<span>azi</span></div>
+        <svg class="rack-spark" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline points="0,6 10,10 20,5 30,13 40,8 50,15 60,9 70,6 80,12 90,7 100,10" fill="none" stroke="var(--red)" stroke-width="1.6"/></svg>
+        <div class="rack-delta down">▼ 3 față de ieri</div>
+      </div>
+      <div class="rack-module">
+        <div class="rack-top"><span class="rack-label">Bilete deschise</span><span class="led"></span></div>
+        <div class="rack-value">5</div>
+        <svg class="rack-spark" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline points="0,14 10,10 20,12 30,8 40,11 50,7 60,9 70,5 80,8 90,6 100,9" fill="none" stroke="var(--cyan)" stroke-width="1.6"/></svg>
+        <div class="rack-delta">4.2m timp mediu răsp.</div>
+      </div>
+      <div class="rack-module">
+        <div class="rack-top"><span class="rack-label">Monedă în circulație</span><span class="led amber"></span></div>
+        <div class="rack-value">412<span>k 🔩</span></div>
+        <svg class="rack-spark" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline points="0,16 10,13 20,14 30,9 40,10 50,6 60,8 70,4 80,7 90,3 100,5" fill="none" stroke="var(--amber)" stroke-width="1.6"/></svg>
+        <div class="rack-delta">▲ 8.4% această săptămână</div>
+      </div>
+    </div>
+
+    <!-- MODULE GRID -->
+    <div class="section-head" id="moderation">
+      <h2>Module active</h2>
+      <span class="cnt">6 din 8 module pornite</span>
+    </div>
+
+    <div class="grid">
+      <!-- Moderation -->
+      <div class="module-card">
+        <span class="screw tl"></span><span class="screw tr"></span><span class="screw bl"></span><span class="screw br"></span>
+        <div class="module-top">
+          <div class="module-icon-wrap">
+            <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.8"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z"/></svg></div>
+            <div><div class="module-name">Moderare</div><div class="module-tag">Auto-mod</div></div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <p class="module-desc">Filtrează spam, linkuri și limbaj toxic. Aplică avertismente și interdicții automate pe baza pragurilor setate.</p>
+        <div class="module-stats">
+          <div class="mstat"><b>28</b><span>Avertismente</span></div>
+          <div class="mstat"><b>6</b><span>Excluderi</span></div>
+          <div class="mstat"><b>142</b><span>Mesaje filtrate</span></div>
+        </div>
+        <button class="module-cta">Configurează reguli →</button>
+      </div>
+
+      <!-- Music -->
+      <div class="module-card music-card" id="music">
+        <span class="screw tl"></span><span class="screw tr"></span><span class="screw bl"></span><span class="screw br"></span>
+        <div class="module-top">
+          <div class="module-icon-wrap">
+            <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="1.8"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></div>
+            <div><div class="module-name">Muzică</div><div class="module-tag">Canal: Lounge</div></div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="now-playing">
+          <div class="album"><div class="bars"><i></i><i></i><i></i><i></i></div></div>
+          <div class="track-info">
+            <div class="t">Midnight Drive</div>
+            <div class="a">Nova Sonic · adăugat de kira_</div>
+          </div>
+        </div>
+        <div class="progress-bar"><i></i></div>
+        <div class="progress-time"><span>1:24</span><span>3:41</span></div>
+        <div class="module-stats">
+          <div class="mstat"><b>7</b><span>În coadă</span></div>
+          <div class="mstat"><b>231</b><span>Piese azi</span></div>
+        </div>
+        <button class="module-cta">Deschide coada →</button>
+      </div>
+
+      <!-- Leveling -->
+      <div class="module-card" id="leveling">
+        <span class="screw tl"></span><span class="screw tr"></span><span class="screw bl"></span><span class="screw br"></span>
+        <div class="module-top">
+          <div class="module-icon-wrap">
+            <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--violet)" stroke-width="1.8"><path d="M3 21V9M10 21V3M17 21v-7"/></svg></div>
+            <div><div class="module-name">Nivele &amp; XP</div><div class="module-tag">Clasament</div></div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div>
+          <div class="lb-row"><span class="lb-rank top">01</span><div class="lb-av"></div><span class="lb-name">stelian.dev</span><span class="lb-xp">Nv. 62 · 48.2k XP</span></div>
+          <div class="lb-row"><span class="lb-rank top">02</span><div class="lb-av"></div><span class="lb-name">iuliaaa</span><span class="lb-xp">Nv. 58 · 41.7k XP</span></div>
+          <div class="lb-row"><span class="lb-rank">03</span><div class="lb-av"></div><span class="lb-name">robert_gg</span><span class="lb-xp">Nv. 55 · 39.0k XP</span></div>
+        </div>
+        <button class="module-cta">Vezi clasamentul complet →</button>
+      </div>
+
+      <!-- Economy -->
+      <div class="module-card" id="economy">
+        <span class="screw tl"></span><span class="screw tr"></span><span class="screw bl"></span><span class="screw br"></span>
+        <div class="module-top">
+          <div class="module-icon-wrap">
+            <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9.5c0-1.4 1.3-2.5 3-2.5s3 1.1 3 2.5-1.3 2-3 2.5c-1.7.5-3 1.1-3 2.5s1.3 2.5 3 2.5 3-1.1 3-2.5"/></svg></div>
+            <div><div class="module-name">Economie</div><div class="module-tag">Monedă: Șuruburi 🔩</div></div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <p class="module-desc">Recompense zilnice, pariuri, magazin de roluri și obiecte cumpărabile cu monedă virtuală.</p>
+        <div class="module-stats">
+          <div class="mstat"><b>412k</b><span>În circulație</span></div>
+          <div class="mstat"><b>19</b><span>Obiecte magazin</span></div>
+        </div>
+        <button class="module-cta">Editează magazinul →</button>
+      </div>
+
+      <!-- Welcome -->
+      <div class="module-card" id="welcome">
+        <span class="screw tl"></span><span class="screw tr"></span><span class="screw bl"></span><span class="screw br"></span>
+        <div class="module-top">
+          <div class="module-icon-wrap">
+            <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="1.8"><path d="M3 12l4-4m0 0l4 4m-4-4v14"/><path d="M13 6h8M13 12h8M13 18h8"/></svg></div>
+            <div><div class="module-name">Bun venit &amp; Roluri</div><div class="module-tag">Canal: #intrare</div></div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="wc-preview">👋 Bine ai venit, <b>@membru_nou</b>! Ești al <b>4218-lea</b> pe Vale Gaming RO. Verifică-te în #reguli pentru rolul de Membru.</div>
+        <div class="module-stats">
+          <div class="mstat"><b>96%</b><span>Rată verificare</span></div>
+          <div class="mstat"><b>12</b><span>Roluri automate</span></div>
+        </div>
+        <button class="module-cta">Editează mesajul →</button>
+      </div>
+
+      <!-- Logging -->
+      <div class="module-card" id="logs">
+        <span class="screw tl"></span><span class="screw tr"></span><span class="screw bl"></span><span class="screw br"></span>
+        <div class="module-top">
+          <div class="module-icon-wrap">
+            <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg></div>
+            <div><div class="module-name">Jurnal server</div><div class="module-tag">Canal: #audit-log</div></div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="tlist">
+          <div class="trow">Mesaje șterse<div class="tsw on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="trow">Intrări / ieșiri membri<div class="tsw on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="trow">Modificări roluri<div class="tsw on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="trow">Editări mesaje<div class="tsw" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+        <button class="module-cta">Vezi tot jurnalul →</button>
+      </div>
+    </div>
+
+    <!-- TICKETS -->
+    <div class="section-head" id="tickets">
+      <h2>Sistem de bilete</h2>
+      <span class="cnt">5 deschise · 214 rezolvate total</span>
+    </div>
+    <div class="grid">
+      <div class="module-card">
+        <span class="screw tl"></span><span class="screw tr"></span><span class="screw bl"></span><span class="screw br"></span>
+        <div class="module-top">
+          <div class="module-icon-wrap">
+            <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="1.8"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V9Z"/></svg></div>
+            <div><div class="module-name">Suport &amp; Bilete</div><div class="module-tag">Categorie: Suport</div></div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <p class="module-desc">Membrii deschid bilete printr-un buton, iar staff-ul preia conversația într-un canal privat generat automat.</p>
+        <div class="module-stats">
+          <div class="mstat"><b>5</b><span>Deschise</span></div>
+          <div class="mstat"><b>4.2m</b><span>Timp mediu răsp.</span></div>
+          <div class="mstat"><b>214</b><span>Rezolvate</span></div>
+        </div>
+        <button class="module-cta">Vezi biletele →</button>
+      </div>
+
+      <div class="module-card">
+        <span class="screw tl"></span><span class="screw tr"></span><span class="screw bl"></span><span class="screw br"></span>
+        <div class="module-top">
+          <div class="module-icon-wrap">
+            <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8"><path d="M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/><path d="M12 8v4l3 2"/></svg></div>
+            <div><div class="module-name">Giveaway-uri</div><div class="module-tag">Canal: #evenimente</div></div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <p class="module-desc">Creează extrageri cu buton de participare, cerințe de nivel minim și extrage automat câștigătorul la timer.</p>
+        <div class="module-stats">
+          <div class="mstat"><b>1</b><span>Activ acum</span></div>
+          <div class="mstat"><b>312</b><span>Participanți</span></div>
+          <div class="mstat"><b>18h</b><span>Timp rămas</span></div>
+        </div>
+        <button class="module-cta">Creează giveaway →</button>
+      </div>
+
+      <div class="module-card">
+        <span class="screw tl"></span><span class="screw tr"></span><span class="screw bl"></span><span class="screw br"></span>
+        <div class="module-top">
+          <div class="module-icon-wrap">
+            <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.8"><path d="M12 2 2 7v6c0 5 4.5 8.5 10 9 5.5-.5 10-4 10-9V7l-10-5Z"/><path d="M9 12l2 2 4-4"/></svg></div>
+            <div><div class="module-name">Anti-raid</div><div class="module-tag">Protecție intrări</div></div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <p class="module-desc">Detectează valuri de conturi noi, blochează temporar invitațiile și alertează echipa de moderare instant.</p>
+        <div class="module-stats">
+          <div class="mstat"><b>0</b><span>Raiduri azi</span></div>
+          <div class="mstat"><b>7</b><span>Conturi blocate</span></div>
+          <div class="mstat"><b>3z</b><span>Vârstă min. cont</span></div>
+        </div>
+        <button class="module-cta">Configurează praguri →</button>
+      </div>
+    </div>
+
+    <!-- EXTRA MODULES -->
+    <div class="section-head" id="extra">
+      <h2>Module extra</h2>
+      <span class="cnt">comenzi custom · integrări · comunitate</span>
+    </div>
+    <div class="grid">
+      <div class="module-card">
+        <span class="screw tl"></span><span class="screw tr"></span><span class="screw bl"></span><span class="screw br"></span>
+        <div class="module-top">
+          <div class="module-icon-wrap">
+            <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--violet)" stroke-width="1.8"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M13 6l-2 12"/></svg></div>
+            <div><div class="module-name">Comenzi personalizate</div><div class="module-tag">Prefix: !</div></div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <p class="module-desc">Definește comenzi text sau slash proprii, cu răspunsuri, embed-uri și variabile dinamice, fără cod.</p>
+        <div class="module-stats">
+          <div class="mstat"><b>23</b><span>Comenzi active</span></div>
+          <div class="mstat"><b>1.1k</b><span>Utilizări/lună</span></div>
+        </div>
+        <button class="module-cta">Editează comenzile →</button>
+      </div>
+
+      <div class="module-card">
+        <span class="screw tl"></span><span class="screw tr"></span><span class="screw bl"></span><span class="screw br"></span>
+        <div class="module-top">
+          <div class="module-icon-wrap">
+            <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M10 9l5 3-5 3V9Z" fill="var(--cyan)" stroke="none"/></svg></div>
+            <div><div class="module-name">Integrări Twitch &amp; YouTube</div><div class="module-tag">2 conturi conectate</div></div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <p class="module-desc">Trimite anunț automat în #stream-uri când un creator urmărit intră live sau publică un videoclip nou.</p>
+        <div class="module-stats">
+          <div class="mstat"><b>2</b><span>Surse urmărite</span></div>
+          <div class="mstat"><b>34</b><span>Anunțuri luna asta</span></div>
+        </div>
+        <button class="module-cta">Adaugă sursă →</button>
+      </div>
+
+      <div class="module-card">
+        <span class="screw tl"></span><span class="screw tr"></span><span class="screw bl"></span><span class="screw br"></span>
+        <div class="module-top">
+          <div class="module-icon-wrap">
+            <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z"/></svg></div>
+            <div><div class="module-name">Starboard</div><div class="module-tag">Prag: 5 ⭐</div></div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <p class="module-desc">Mesajele care primesc suficiente reacții ⭐ ajung automat în canalul #hall-of-fame.</p>
+        <div class="module-stats">
+          <div class="mstat"><b>41</b><span>Mesaje evidențiate</span></div>
+          <div class="mstat"><b>5</b><span>Prag reacții</span></div>
+        </div>
+        <button class="module-cta">Vezi hall of fame →</button>
+      </div>
+
+      <div class="module-card">
+        <span class="screw tl"></span><span class="screw tr"></span><span class="screw bl"></span><span class="screw br"></span>
+        <div class="module-top">
+          <div class="module-icon-wrap">
+            <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+            <div><div class="module-name">Sondaje</div><div class="module-tag">Canal: #feedback</div></div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <p class="module-desc">Creează sondaje rapide cu reacții sau butoane și vezi rezultatele actualizate live, în timp real.</p>
+        <div class="module-stats">
+          <div class="mstat"><b>2</b><span>Active acum</span></div>
+          <div class="mstat"><b>89</b><span>Voturi azi</span></div>
+        </div>
+        <button class="module-cta">Creează sondaj →</button>
+      </div>
+
+      <div class="module-card">
+        <span class="screw tl"></span><span class="screw tr"></span><span class="screw bl"></span><span class="screw br"></span>
+        <div class="module-top">
+          <div class="module-icon-wrap">
+            <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.8"><path d="M12 8v4l2.5 2.5"/><circle cx="12" cy="13" r="8"/><path d="M9 2h6M12 2v3"/></svg></div>
+            <div><div class="module-name">Reamintiri</div><div class="module-tag">Comandă: /remind</div></div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <p class="module-desc">Membrii își pot seta memento-uri personale trimise prin DM sau în canal, la dată și oră fixă.</p>
+        <div class="module-stats">
+          <div class="mstat"><b>16</b><span>Programate</span></div>
+          <div class="mstat"><b>203</b><span>Trimise total</span></div>
+        </div>
+        <button class="module-cta">Vezi programate →</button>
+      </div>
+
+      <div class="module-card">
+        <span class="screw tl"></span><span class="screw tr"></span><span class="screw bl"></span><span class="screw br"></span>
+        <div class="module-top">
+          <div class="module-icon-wrap">
+            <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="1.8"><path d="M21 12a9 9 0 1 1-3.5-7.1"/><path d="M21 3v6h-6"/></svg></div>
+            <div><div class="module-name">Backup &amp; Restaurare</div><div class="module-tag">Automat · zilnic</div></div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <p class="module-desc">Salvează structura de canale, roluri și permisiuni; poți restaura serverul dintr-un singur click.</p>
+        <div class="module-stats">
+          <div class="mstat"><b>14</b><span>Copii salvate</span></div>
+          <div class="mstat"><b>2h</b><span>Ultima azi</span></div>
+        </div>
+        <button class="module-cta">Restaurează backup →</button>
+      </div>
+    </div>
+
+    <!-- SELFROLES -->
+    <div class="section-head" id="selfroles">
+      <h2>Selfroles</h2>
+      <span class="cnt">3 panouri active · configurabil complet din dashboard</span>
+    </div>
+
+    <div class="sr-panels">
+      <div class="sr-panel-row">
+        <div class="sr-type-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01M8 15c1.2 1 2.4 1.5 4 1.5s2.8-.5 4-1.5"/></svg></div>
+        <div class="sr-panel-info">
+          <div class="n">Notificări joc · #selfroles</div>
+          <div class="m">Reacție cu emoji · 6 roluri</div>
+        </div>
+        <div class="sr-panel-roles">
+          <span class="role-pill"><i style="background:var(--cyan)"></i>Valorant</span>
+          <span class="role-pill"><i style="background:var(--violet)"></i>LoL</span>
+          <span class="role-pill"><i style="background:var(--amber)"></i>+4</span>
+        </div>
+        <div class="switch on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="sr-panel-row">
+        <div class="sr-type-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8 12h8"/></svg></div>
+        <div class="sr-panel-info">
+          <div class="n">Pronume &amp; identitate · #reguli</div>
+          <div class="m">Butoane · 3 roluri</div>
+        </div>
+        <div class="sr-panel-roles">
+          <span class="role-pill"><i style="background:var(--cyan)"></i>El/Îl</span>
+          <span class="role-pill"><i style="background:var(--violet)"></i>Ea/O</span>
+          <span class="role-pill"><i style="background:var(--text-faint)"></i>Neutru</span>
+        </div>
+        <div class="switch on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="sr-panel-row">
+        <div class="sr-type-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.8"><path d="M6 9l6 6 6-6"/><rect x="4" y="4" width="16" height="16" rx="4" opacity=".0"/></svg></div>
+        <div class="sr-panel-info">
+          <div class="n">Regiune server · #selfroles</div>
+          <div class="m">Meniu dropdown · 5 roluri</div>
+        </div>
+        <div class="sr-panel-roles">
+          <span class="role-pill"><i style="background:var(--amber)"></i>RO</span>
+          <span class="role-pill"><i style="background:var(--cyan)"></i>EU</span>
+          <span class="role-pill"><i style="background:var(--text-faint)"></i>+3</span>
+        </div>
+        <div class="switch" onclick="this.classList.toggle('on')"></div>
+      </div>
+    </div>
+
+    <div class="sr-wrap">
+      <div class="builder-card">
+        <div class="builder-head"><h3>Creează panou nou</h3></div>
+
+        <div class="type-tabs">
+          <div class="type-tab active" onclick="setSrType(this,'reaction')">Reacție emoji</div>
+          <div class="type-tab" onclick="setSrType(this,'button')">Butoane</div>
+          <div class="type-tab" onclick="setSrType(this,'dropdown')">Dropdown</div>
+        </div>
+
+        <div class="field">
+          <label>Titlu panou</label>
+          <input type="text" id="srTitle" value="Alege-ți jocurile favorite" oninput="updatePreview()">
+        </div>
+        <div class="field">
+          <label>Descriere</label>
+          <textarea id="srDesc" rows="2" oninput="updatePreview()">Reacționează pentru a primi rolul jocului tău preferat și a vedea canalele dedicate.</textarea>
+        </div>
+        <div class="field">
+          <label>Canal destinație</label>
+          <input type="text" id="srChannel" value="#selfroles" oninput="updatePreview()">
+        </div>
+
+        <div class="field">
+          <label>Roluri asociate</label>
+          <div id="roleRows">
+            <div class="role-row">
+              <div class="emoji-box">🎯</div>
+              <input class="role-select" value="Valorant" oninput="updatePreview()">
+              <span class="role-color" style="background:var(--cyan)"></span>
+              <button class="rm-btn" onclick="removeRole(this)">✕</button>
+            </div>
+            <div class="role-row">
+              <div class="emoji-box">⚔️</div>
+              <input class="role-select" value="League of Legends" oninput="updatePreview()">
+              <span class="role-color" style="background:var(--violet)"></span>
+              <button class="rm-btn" onclick="removeRole(this)">✕</button>
+            </div>
+            <div class="role-row">
+              <div class="emoji-box">🚀</div>
+              <input class="role-select" value="Fortnite" oninput="updatePreview()">
+              <span class="role-color" style="background:var(--amber)"></span>
+              <button class="rm-btn" onclick="removeRole(this)">✕</button>
+            </div>
+          </div>
+        </div>
+        <button class="add-role-btn" onclick="addRole()">+ Adaugă rol</button>
+
+        <div class="builder-options">
+          <div class="opt-row">Permite selecție multiplă<div class="tsw on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="opt-row">Elimină rolul la dez-reacție<div class="tsw on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="opt-row">Limitează la 1 rol / utilizator<div class="tsw" onclick="this.classList.toggle('on')"></div></div>
+          <div class="opt-row">Necesită verificare server<div class="tsw" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+
+        <button class="btn-primary">Publică panoul în Discord</button>
+      </div>
+
+      <div class="sr-preview-wrap">
+        <div class="sr-preview-label">Previzualizare live</div>
+        <div class="discord-mock">
+          <div class="msg-head">
+            <div class="bot-av"></div>
+            <div><span class="bot-name">NOKI</span><span class="bot-tag">BOT</span></div>
+          </div>
+          <div class="discord-embed">
+            <div class="et" id="pvTitle">Alege-ți jocurile favorite</div>
+            <div class="ed" id="pvDesc">Reacționează pentru a primi rolul jocului tău preferat și a vedea canalele dedicate.</div>
+            <div class="embed-role-list" id="pvRoles">
+              <div class="embed-role-item"><span>🎯</span><span class="rdot" style="background:var(--cyan)"></span><span>Valorant</span></div>
+              <div class="embed-role-item"><span>⚔️</span><span class="rdot" style="background:var(--violet)"></span><span>League of Legends</span></div>
+              <div class="embed-role-item"><span>🚀</span><span class="rdot" style="background:var(--amber)"></span><span>Fortnite</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY + CHART -->
+    <div class="section-head"><h2>Activitate live</h2><span class="cnt">flux în timp real</span></div>
+    <div class="split">
+      <div class="console-panel">
+        <div class="console-head">
+          <div class="dots"><i></i><i></i><i></i></div>
+          <div class="console-title">audit-log · live</div>
+        </div>
+        <div class="log-line"><span class="ts">14:02:11</span><span class="tag mod">MOD</span><span class="msg">@sorin_ a primit avertisment (spam) în #general</span></div>
+        <div class="log-line"><span class="ts">14:01:47</span><span class="tag lvl">XP</span><span class="msg">@iuliaaa a atins nivelul 58</span></div>
+        <div class="log-line"><span class="ts">14:00:58</span><span class="tag sys">SYS</span><span class="msg">Modulul Muzică a reconectat la canalul Lounge</span></div>
+        <div class="log-line"><span class="ts">13:59:22</span><span class="tag eco">ECO</span><span class="msg">@robert_gg a câștigat 240 🔩 la ruletă</span></div>
+        <div class="log-line"><span class="ts">13:58:04</span><span class="tag mod">MOD</span><span class="msg">Mesaj șters automat din #trade (link suspect)</span></div>
+        <div class="log-line"><span class="ts">13:56:40</span><span class="tag sys">SYS</span><span class="msg">Membru nou: @dana.exe a fost verificată</span></div>
+        <div class="log-line" style="border-bottom:none;"><span class="ts">13:55:12</span><span class="tag lvl">XP</span><span class="msg">@stelian.dev a deblocat rolul „Veteran"</span></div>
+      </div>
+
+      <div class="chart-panel">
+        <div class="th"><h3>Comenzi utilizate</h3><span class="sub">ultimele 24h</span></div>
+        <div class="bar-row"><span class="lbl">/play</span><div class="bar-track"><div class="bar-fill" style="width:88%"></div></div><span class="val">912</span></div>
+        <div class="bar-row"><span class="lbl">/warn</span><div class="bar-track"><div class="bar-fill" style="width:34%"></div></div><span class="val">318</span></div>
+        <div class="bar-row"><span class="lbl">/rank</span><div class="bar-track"><div class="bar-fill" style="width:61%"></div></div><span class="val">574</span></div>
+        <div class="bar-row"><span class="lbl">/daily</span><div class="bar-track"><div class="bar-fill" style="width:72%"></div></div><span class="val">689</span></div>
+        <div class="bar-row"><span class="lbl">/shop</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="val">211</span></div>
+        <div class="bar-row"><span class="lbl">/ban</span><div class="bar-track"><div class="bar-fill" style="width:9%"></div></div><span class="val">42</span></div>
+      </div>
+    </div>
+
+    <footer class="foot">
+      <span>NOKI BOT · nod eu-central-1 · versiune 2.4.4</span>
+      <span>© 2026 · Toate sistemele funcționale</span>
+    </footer>
+  </main>
+</div>
+
+<script>
+const emojiSet = ['🎮','🎯','⚔️','🚀','🏆','🔥','🌟','🎧','🎲','🛡️'];
+const colorSet = ['var(--cyan)','var(--violet)','var(--amber)','#7fd88f','#ff9fb2','var(--red)'];
+let colorCursor = 3;
+
+function setSrType(el, type){
+  document.querySelectorAll('.type-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const emojiCols = document.querySelectorAll('.emoji-box');
+  emojiCols.forEach(e=> e.style.display = (type==='dropdown') ? 'none' : 'flex');
+  updatePreview();
+}
+
+function addRole(){
+  const wrap = document.getElementById('roleRows');
+  const row = document.createElement('div');
+  row.className = 'role-row';
+  const emoji = emojiSet[Math.floor(Math.random()*emojiSet.length)];
+  const color = colorSet[colorCursor % colorSet.length];
+  colorCursor++;
+  row.innerHTML = `
+    <div class="emoji-box">${emoji}</div>
+    <input class="role-select" value="Rol nou" oninput="updatePreview()">
+    <span class="role-color" style="background:${color}"></span>
+    <button class="rm-btn" onclick="removeRole(this)">✕</button>`;
+  wrap.appendChild(row);
+  updatePreview();
+}
+
+function removeRole(btn){
+  btn.closest('.role-row').remove();
+  updatePreview();
+}
+
+function updatePreview(){
+  document.getElementById('pvTitle').textContent = document.getElementById('srTitle').value || 'Titlu panou';
+  document.getElementById('pvDesc').textContent = document.getElementById('srDesc').value || '';
+  const rows = document.querySelectorAll('#roleRows .role-row');
+  const pv = document.getElementById('pvRoles');
+  pv.innerHTML = '';
+  rows.forEach(r=>{
+    const emoji = r.querySelector('.emoji-box').textContent;
+    const name = r.querySelector('.role-select').value || 'Rol';
+    const color = r.querySelector('.role-color').style.background;
+    const item = document.createElement('div');
+    item.className = 'embed-role-item';
+    item.innerHTML = `<span>${emoji}</span><span class="rdot" style="background:${color}"></span><span>${name}</span>`;
+    pv.appendChild(item);
+  });
+}
+
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click', e=>{
+    document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+    item.classList.add('active');
+    document.getElementById('sidebar').classList.remove('open');
+  });
+});
+</script>
+</body>
 </html>

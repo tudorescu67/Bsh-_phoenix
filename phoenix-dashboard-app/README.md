@@ -2,7 +2,7 @@
 
 Aplicatie simplă, gata pentru Vercel sau VPS, cu autentificare simulată prin Discord și control de permisiuni.
 
-Versiune curentă: BSH 2.4.3
+Versiune curentă: BSH 2.4.4
 
 ## Rulare local
 
