@@ -177,9 +177,36 @@ function checkApiHealth() {
     return;
   }
 
-  status.textContent = 'online';
-  status.classList.remove('status-offline');
-  status.classList.add('status-online');
+  status.textContent = 'checking';
+  status.classList.remove('status-online', 'status-offline');
+
+  const normalized = endpoint.replace(/\/$/, '');
+  const candidates = [`${normalized}/health`, `${normalized}/api/health`, normalized];
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 4500);
+
+  Promise.any(
+    candidates.map(url =>
+      fetch(url, { method: 'GET', signal: controller.signal }).then(response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response;
+      })
+    )
+  )
+    .then(() => {
+      status.textContent = 'online';
+      status.classList.remove('status-offline');
+      status.classList.add('status-online');
+      document.getElementById('lastSync').textContent = `Ultima sincronizare: ${new Date().toLocaleString('ro-RO')}`;
+    })
+    .catch(() => {
+      status.textContent = 'offline';
+      status.classList.remove('status-online');
+      status.classList.add('status-offline');
+    })
+    .finally(() => {
+      clearTimeout(timeoutId);
+    });
 }
 
 function loadConfig() {
