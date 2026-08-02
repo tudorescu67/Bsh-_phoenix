@@ -16,7 +16,7 @@
 
 .content-area {
   flex: 1;
-  padding: 22px 24px 26px;
+  padding: 18px 18px 22px;
   overflow-y: auto;
   position: relative;
 }
@@ -24,8 +24,8 @@
 .content-area::before {
   content: '';
   position: absolute;
-  inset: 14px;
-  border: 1px solid rgba(108, 92, 231, 0.1);
+  inset: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 18px;
   pointer-events: none;
 }
@@ -36,6 +36,6 @@
   }
 
   .content-area {
-    padding: 18px;
+    padding: 14px;
   }
 }

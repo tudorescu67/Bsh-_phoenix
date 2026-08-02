@@ -7,13 +7,16 @@
 .settings-container {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
 .settings-section {
-  background: var(--bg-secondary);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 16px;
-  padding: 24px;
+  padding: 20px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.18);
 }
 
 .section-title {
@@ -55,8 +58,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px;
-  background: var(--bg-primary);
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
 }
 
 .toggle-switch {
@@ -79,7 +82,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--bg-primary);
+  background-color: rgba(255, 255, 255, 0.08);
   transition: .4s;
   border-radius: 28px;
 }
@@ -91,7 +94,7 @@
   width: 20px;
   left: 4px;
   bottom: 4px;
-  background-color: white;
+  background-color: #fff;
   transition: .4s;
   border-radius: 50%;
 }
@@ -134,8 +137,8 @@
 }
 
 .permission-card {
-  background: var(--bg-primary);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 14px;
   padding: 16px;
 }
@@ -190,7 +193,8 @@
 }
 
 .audit-log-item {
-  background: var(--bg-primary);
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 14px;
   padding: 14px 16px;
   display: flex;
@@ -215,4 +219,44 @@
 .audit-log-empty {
   color: var(--text-muted);
   padding: 8px 2px;
+}
+
+.server-select,
+.server-select:focus,
+.server-select:hover {
+  border-radius: 12px;
+}
+
+.server-select {
+  width: 100%;
+  padding: 11px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.server-select:hover,
+.server-select:focus {
+  border-color: rgba(88, 101, 242, 0.3);
+}
+
+.server-select,
+.btn-save,
+.btn-danger,
+.role-chip,
+.toggle-switch .slider,
+.nav-item,
+.save-btn {
+  transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out, border-color 0.2s ease-in-out, background 0.2s ease-in-out;
+}
+
+.server-select:hover,
+.btn-save:hover,
+.btn-danger:hover,
+.role-chip:hover,
+.nav-item:hover,
+.save-btn:hover {
+  transform: scale(1.02);
+  opacity: 0.98;
 }

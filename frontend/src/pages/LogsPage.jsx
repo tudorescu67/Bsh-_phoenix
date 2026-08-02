@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import './SettingsPage.css';
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
 const DEFAULT_FORM = {
   action: 'moderation_ban',
   category: 'moderation',
@@ -22,7 +22,7 @@ function LogsPage() {
 
     async function loadLogs() {
       try {
-        const response = await fetch(`${API_BASE}/api/dashboard/logs`);
+        const response = await fetch(`${API_BASE}/dashboard/logs`);
         const json = await response.json();
 
         if (mounted) {
@@ -47,7 +47,7 @@ function LogsPage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const response = await fetch(`${API_BASE}/api/dashboard/logs`, {
+    const response = await fetch(`${API_BASE}/dashboard/logs`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),

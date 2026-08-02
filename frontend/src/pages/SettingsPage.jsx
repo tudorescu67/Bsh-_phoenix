@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import './SettingsPage.css';
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
 const ROLE_OPTIONS = ['owner', 'admin', 'moderator', 'support', 'viewer'];
 
 const FALLBACK_MODULES = [
@@ -36,9 +36,9 @@ function SettingsPage() {
     async function loadDashboardData() {
       try {
         const [permissionsRes, logsRes, botsRes] = await Promise.all([
-          fetch(`${API_BASE}/api/dashboard/permissions`),
-          fetch(`${API_BASE}/api/dashboard/logs`),
-          fetch(`${API_BASE}/api/dashboard/bots`),
+          fetch(`${API_BASE}/dashboard/permissions`),
+          fetch(`${API_BASE}/dashboard/logs`),
+          fetch(`${API_BASE}/dashboard/bots`),
         ]);
 
         const permissionsJson = await permissionsRes.json();
@@ -78,7 +78,7 @@ function SettingsPage() {
   const uniqueRoles = useMemo(() => ROLE_OPTIONS, []);
 
   const handleLogAction = async (action, category) => {
-    await fetch(`${API_BASE}/api/dashboard/logs`, {
+    await fetch(`${API_BASE}/dashboard/logs`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

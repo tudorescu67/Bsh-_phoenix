@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import io from 'socket.io-client';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
+import DashboardHomePage from './pages/DashboardHomePage';
 import MusicPage from './pages/MusicPage';
 import GamesPage from './pages/GamesPage';
 import EconomyPage from './pages/EconomyPage';
@@ -24,7 +25,9 @@ function App() {
   const [isBotOnline, setIsBotOnline] = useState(true);
   const [ping, setPing] = useState('42ms');
   const [uptime, setUpTime] = useState('2d 5h 30m');
-  const [currentModule, setCurrentModule] = useState('muzica');
+  const [currentModule, setCurrentModule] = useState('home');
+  const [servers, setServers] = useState([]);
+  const [selectedServerId, setSelectedServerId] = useState('');
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -36,6 +39,35 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadServers() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/dashboard/servers`);
+        const payload = await response.json();
+        const list = Array.isArray(payload) ? payload : [];
+
+        if (!mounted) return;
+        setServers(list);
+        setSelectedServerId((current) => current || list[0]?.id || '');
+      } catch {
+        if (mounted) {
+          setServers([]);
+          setSelectedServerId('');
+        }
+      }
+    }
+
+    loadServers();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const selectedServer = servers.find((server) => server.id === selectedServerId) || servers[0] || null;
+
   return (
     <Router basename={ROUTER_BASENAME}>
       <div className="app-container">
@@ -46,10 +78,13 @@ function App() {
             ping={ping} 
             uptime={uptime} 
             currentModule={currentModule}
+            servers={servers}
+            selectedServerId={selectedServerId}
+            onServerChange={setSelectedServerId}
           />
           <div className="content-area">
             <Routes>
-              <Route path="/" element={<Navigate to="/jocuri" replace />} />
+              <Route path="/" element={<DashboardHomePage selectedServer={selectedServer} selectedServerId={selectedServerId} />} />
               <Route path="/muzica" element={<MusicPage />} />
               <Route path="/jocuri" element={<GamesPage />} />
               <Route path="/economie" element={<EconomyPage />} />
@@ -61,6 +96,25 @@ function App() {
                 path="/selfroles"
                 element={<SelfRolesPage />}
               />
+              <Route
+                path="/members"
+                element={
+                  <FeatureHubPage
+                    title="Management Membri"
+                    description="Zona centrală pentru moderare, self roles, verify și onboarding. Efecte fine de glow, structură curată și acces rapid la controalele importante."
+                    pillars={[
+                      { icon: '🛡️', name: 'Moderare', text: 'Warn, mute, kick, ban și acțiuni staff dintr-un singur hub.' },
+                      { icon: '🧩', name: 'Self Roles', text: 'Distribuție roluri, embed panel și selecție controlată.' },
+                      { icon: '✨', name: 'Welcome & Verify', text: 'Flux de onboarding, verificare și roluri automate.' },
+                    ]}
+                  />
+                }
+              />
+              <Route path="/ai-moderation" element={<Navigate to="/auto-moderation" replace />} />
+              <Route path="/ticket-system" element={<Navigate to="/tickets" replace />} />
+              <Route path="/monetizare" element={<Navigate to="/economie" replace />} />
+              <Route path="/stats-logs" element={<Navigate to="/loguri" replace />} />
+              <Route path="/advanced-settings" element={<Navigate to="/integrations" replace />} />
               <Route
                 path="/templates-server"
                 element={
@@ -173,7 +227,7 @@ function App() {
                   />
                 }
               />
-              <Route path="*" element={<Navigate to="/jocuri" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>
         </div>
