@@ -1,6 +1,6 @@
 {
-  "name": "phoenix-dashboard-app",
-  "version": "2.4.4",
+  "name": "alexmenu-dashboard",
+  "version": "2.5.6",
   "private": true,
   "scripts": {
     "start": "npx serve .",

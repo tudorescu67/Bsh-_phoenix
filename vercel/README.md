@@ -1,13 +1,13 @@
-# Phoenix Dashboard
+# AlexMenu Dashboard
 
 Aplicatie simplă, gata pentru Vercel sau VPS, cu autentificare simulată prin Discord și control de permisiuni.
 
-Versiune curentă: BSH 2.4.4
+Versiune curentă: AlexMenu 2.5.6
 
 ## Rulare local
 
 1. Intră în folderul proiectului:
-   - cd phoenix-dashboard-app
+   - cd vercel
 2. Rulează:
    - npm install
    - npm start

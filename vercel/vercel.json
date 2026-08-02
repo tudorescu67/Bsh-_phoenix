@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "phoenix-dashboard-app",
+  "name": "alexmenu-dashboard",
   "builds": [
     { "src": "index.html", "use": "@vercel/static" }
   ],
