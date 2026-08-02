@@ -9,6 +9,14 @@
   ],
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "http://185.203.118.214:5000/api/$1"
+    },
+    {
+      "source": "/socket.io/(.*)",
+      "destination": "http://185.203.118.214:5000/socket.io/$1"
+    },
+    {
       "source": "/dashboard",
       "destination": "/index.html"
     },

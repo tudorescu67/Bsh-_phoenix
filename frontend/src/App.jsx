@@ -13,8 +13,8 @@ import SettingsPage from './pages/SettingsPage';
 import LogsPage from './pages/LogsPage';
 import './App.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || API_BASE_URL;
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || window.location.origin;
 const ROUTER_BASENAME = import.meta.env.VITE_ROUTER_BASENAME || '/';
 const socket = io(SOCKET_URL);
 
