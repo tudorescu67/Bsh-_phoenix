@@ -12,6 +12,7 @@ import ModerationPage from './pages/ModerationPage';
 import SettingsPage from './pages/SettingsPage';
 import LogsPage from './pages/LogsPage';
 import FeatureHubPage from './pages/FeatureHubPage';
+import SelfRolesPage from './pages/SelfRolesPage';
 import './App.css';
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
@@ -58,17 +59,7 @@ function App() {
               <Route path="/loguri" element={<LogsPage />} />
               <Route
                 path="/selfroles"
-                element={
-                  <FeatureHubPage
-                    title="Self Roles Manager"
-                    description="Roluri self-assign cu butoane, categorii, cooldown si validari automate pe server." 
-                    pillars={[
-                      { icon: '🎛️', name: 'Role Panels', text: 'Panouri multiple cu grupuri de roluri tematice.' },
-                      { icon: '🧠', name: 'Rules Engine', text: 'Conditii pentru level, vechime, verificare si blacklist.' },
-                      { icon: '⚡', name: 'Instant Sync', text: 'Actualizare instant roluri si audit complet.' },
-                    ]}
-                  />
-                }
+                element={<SelfRolesPage />}
               />
               <Route
                 path="/templates-server"
