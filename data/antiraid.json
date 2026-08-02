@@ -1,0 +1,9 @@
+{
+  "1439347220087312619": {
+    "enabled": true,
+    "limit": 5,
+    "window": 10000,
+    "minAge": 1440,
+    "action": "kick"
+  }
+}

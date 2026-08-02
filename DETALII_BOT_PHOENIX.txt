@@ -1,0 +1,55 @@
+==================================================
+        PHOENIX RISEN - DISCORD BOT FINAL
+==================================================
+
+Sistemul tau de Discord Bot a fost configurat complet! 
+Mai jos ai toate detaliile necesare pentru a-l pune in functiune.
+
+--- COMNEZI DE SETUP (ADMINISTRATOR) ---
+
+1. TICKET SYSTEM:
+   /ticket setup (Alege canalul pentru panou, categoria si rolul staff)
+   - Include: Categorii (VIP, Bug, etc.), Claim, Add/Remove Member, Transcript HTML.
+
+2. STAFF APPLICATIONS (16+):
+   /apply setup (Configureaza canalul unde apar cererile)
+   - Include: Verificare varsta automata, Modal form, Butoane Accept/Deny.
+
+3. VOICE TEMPORAR (JOIN TO CREATE):
+   /voice setup (Alege canalul generator si categoria)
+   - Include: Panou de control (Lock, Hide, Rename, Limit, Kick).
+
+4. SELF-ROLES:
+   /selfroles setup (Alege canalul pentru panoul de roluri)
+   - Include: Meniu drop-down cu roluri multiple.
+
+5. PANOURI INTERACTIVE (GIVEAWAY, GAMES, SOCIAL, RADIO):
+   /setup-panels (Trimite toate panourile intr-un canal ales)
+
+6. VERIFICARE (CAPTCHA / REACTIE):
+   /verify setup (Configureaza sistemul de protectie anti-bot)
+
+7. STATISTICI SERVER:
+   /setup-stats (Creeaza canale vocale care arata numarul de membri/boti)
+
+8. AI CHAT:
+   /ai (OpenAI API, Ollama local sau DuckDuckGo/Claude/Gemini prin browser)
+   - Pentru OpenAI seteaza OPENAI_API_KEY si OPENAI_MODEL in .env.
+   - Pentru providerii prin browser instaleaza Chromium sau Chrome pe server.
+   - Seteaza PUPPETEER_EXECUTABLE_PATH catre binarul sistemului, de exemplu /usr/bin/chromium.
+
+--- SISTEME AUTOMATE ---
+
+- MUSIC PLAYER: Acum arata "Requested By", "Duration", "Up Next" si are buton de DOWNLOAD.
+- ANTI-RAID: Protectie Anti-Nuke, Anti-Spam si Anti-Link (Permise doar: GIF, YT, TikTok).
+- NSFW SENSOR: Detecteaza poze nepotrivite (3 abateri = Timeout 1h).
+- LEVELING: Sistem de XP si Rank (/rank).
+- WELCOME: Mesaje de bun venit si auto-role.
+- AI CHAT: OpenAI foloseste API direct; Auto incearca OpenAI, Ollama, apoi browser.
+
+--- DOCUMENTE IMPORTANTE ---
+Locatie proiect VPS: /opt/bsh-stack/update phoenix
+
+==================================================
+             PENTRU SUPORT: PHOENIX RISEN
+==================================================

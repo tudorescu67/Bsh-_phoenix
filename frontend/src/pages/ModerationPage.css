@@ -1,0 +1,76 @@
+/* by Capitanul burcea,alex */
+.moderation-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.moderation-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.mod-card {
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.mod-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.mod-btn {
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mod-btn.ban {
+  background: rgba(239, 68, 68, 0.2);
+  color: #EF4444;
+}
+
+.mod-btn.kick {
+  background: rgba(251, 146, 60, 0.2);
+  color: #FB923C;
+}
+
+.mod-btn.mute {
+  background: rgba(250, 204, 21, 0.2);
+  color: #FACC15;
+}
+
+.mod-btn.warn {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3B82F6;
+}
+
+.mod-btn:hover {
+  transform: translateY(-2px);
+}
+
+.log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.log-item {
+  padding: 12px;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  font-size: 14px;
+}

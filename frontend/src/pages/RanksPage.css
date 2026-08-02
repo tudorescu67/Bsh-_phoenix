@@ -1,0 +1,123 @@
+/* by Capitanul burcea,alex */
+.ranks-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.ranks-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+.leaderboard-card,
+.profile-preview {
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg-primary);
+  border-radius: 12px;
+}
+
+.rank-number {
+  width: 32px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.user-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-neon));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 2px;
+}
+
+.user-level {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.user-xp {
+  font-weight: 600;
+  color: var(--accent-neon);
+}
+
+.profile-card {
+  text-align: center;
+}
+
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-neon));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  margin: 0 auto 16px;
+}
+
+.profile-name {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.profile-level {
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.xp-bar {
+  height: 8px;
+  background: var(--bg-primary);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-primary), var(--accent-neon));
+  border-radius: 4px;
+}
+
+.xp-text {
+  color: var(--text-muted);
+  font-size: 13px;
+}
