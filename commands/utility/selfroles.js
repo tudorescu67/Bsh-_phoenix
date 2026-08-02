@@ -49,6 +49,16 @@ module.exports = {
           .addOptions(roles)
       );
 
+      db.set('selfroles_config', interaction.guild.id, {
+        guildId: interaction.guild.id,
+        channelId: canal.id,
+        title: titlu,
+        description: descriere,
+        roles,
+        updatedAt: new Date().toISOString(),
+        updatedBy: interaction.user.tag,
+      });
+
       await canal.send({ embeds: [embed], components: [row] });
       await interaction.reply({ content: `✅ Panoul de auto-roluri a fost creat în ${canal}!`, flags: MessageFlags.Ephemeral });
     }

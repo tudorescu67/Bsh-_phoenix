@@ -8,6 +8,7 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 require('dotenv').config();
+const db = require('../utils/database');
 
 const app = express();
 const server = http.createServer(app);
@@ -31,6 +32,7 @@ const MAX_UPLOAD_BYTES = Math.max(1, Number(process.env.MUSIC_UPLOAD_MAX_MB || 4
 const DASHBOARD_PERMISSIONS_FILE = path.join(DATA_DIR, 'dashboard_permissions.json');
 const DASHBOARD_AUDIT_FILE = path.join(DATA_DIR, 'dashboard_audit.json');
 const MUSIC_UPLOAD_AUDIT_FILE = path.join(DATA_DIR, 'music_upload_audit.json');
+const SELF_ROLES_CONFIG_FILE = 'dashboard_selfroles';
 
 const DASHBOARD_BOTS = [
   {
@@ -423,6 +425,87 @@ app.get('/api/dashboard/bots', (req, res) => {
 
 app.get('/api/dashboard/servers', (req, res) => {
   res.json(DASHBOARD_SERVERS);
+});
+
+app.get('/api/dashboard/selfroles', (req, res) => {
+  const serverId = String(req.query.serverId || '').trim();
+  const dashboardConfigs = db.getAll(SELF_ROLES_CONFIG_FILE) || {};
+  const botConfigs = db.getAll('selfroles_config') || {};
+
+  const normalizeBotConfig = (config, id) => {
+    if (!config) return null;
+    const firstRole = Array.isArray(config.roles) ? config.roles[0] : null;
+
+    return {
+      serverId: id,
+      roleId: firstRole?.value || '',
+      channelId: config.channelId || '',
+      title: config.title || '',
+      description: config.description || '',
+      roles: Array.isArray(config.roles) ? config.roles : [],
+      updatedAt: config.updatedAt || null,
+      updatedBy: config.updatedBy || 'bot-command',
+      source: 'bot-command',
+    };
+  };
+
+  if (serverId) {
+    return res.json({
+      serverId,
+      config: dashboardConfigs[serverId] || normalizeBotConfig(botConfigs[serverId], serverId),
+    });
+  }
+
+  res.json({
+    configs: dashboardConfigs,
+    botConfigs: Object.fromEntries(
+      Object.entries(botConfigs).map(([id, config]) => [id, normalizeBotConfig(config, id)])
+    ),
+  });
+});
+
+app.put('/api/dashboard/selfroles', (req, res) => {
+  const serverId = String(req.body?.serverId || '').trim();
+  const roleId = String(req.body?.roleId || '').trim();
+  const channelId = String(req.body?.channelId || '').trim();
+
+  if (!serverId) return res.status(400).json({ message: 'serverId is required' });
+  if (!roleId) return res.status(400).json({ message: 'roleId is required' });
+  if (!channelId) return res.status(400).json({ message: 'channelId is required' });
+
+  const isSnowflake = (value) => /^\d{17,20}$/.test(value);
+  if (!isSnowflake(roleId) || !isSnowflake(channelId)) {
+    return res.status(400).json({ message: 'roleId and channelId must be valid Discord snowflakes' });
+  }
+
+  const configs = db.getAll(SELF_ROLES_CONFIG_FILE) || {};
+  const updated = {
+    serverId,
+    roleId,
+    channelId,
+    updatedAt: new Date().toISOString(),
+    updatedBy: String(req.body?.updatedBy || 'dashboard-user').trim() || 'dashboard-user',
+  };
+
+  configs[serverId] = updated;
+  db.save(SELF_ROLES_CONFIG_FILE, configs);
+
+  pushAuditLog({
+    action: 'selfroles.update',
+    actor: updated.updatedBy,
+    category: 'selfroles',
+    botProfile: 'phoenix',
+    server: serverId,
+    target: `${roleId} -> ${channelId}`,
+    details: 'Updated self-roles configuration from dashboard',
+    ip: normalizeClientIp(req),
+    location: { label: 'dashboard', country: 'local', city: 'local', estimated: false },
+    socketId: 'dashboard',
+    userAgent: req.headers['user-agent'],
+    createdAt: updated.updatedAt,
+  });
+
+  res.json({ config: updated });
 });
 
 app.put('/api/dashboard/permissions', (req, res) => {
