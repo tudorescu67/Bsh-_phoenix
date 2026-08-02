@@ -10,6 +10,15 @@ const moduleLabels = {
   moderare: 'Moderation Center',
   setari: 'Settings Matrix',
   loguri: 'Event Logs',
+  selfroles: 'Self Roles Manager',
+  templates: 'Server Templates',
+  jarvis: 'Jarvis Voice AI',
+  automod: 'Auto Moderation',
+  welcome: 'Welcome Flow',
+  tickets: 'Tickets & Support',
+  gamespanel: 'Games Panel Access',
+  backup: 'Server Backups',
+  integrations: 'Integrations Hub',
 };
 
 function Topbar({ isBotOnline, ping, uptime, currentModule }) {

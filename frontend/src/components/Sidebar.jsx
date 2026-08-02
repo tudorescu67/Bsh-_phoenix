@@ -5,14 +5,38 @@ import './Sidebar.css';
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
 
-const modules = [
-  { id: 'jocuri', name: 'Server Analytics', icon: '📈', path: '/jocuri' },
-  { id: 'moderare', name: 'Moderation', icon: '🛡️', path: '/moderare' },
-  { id: 'ranks', name: 'Leveling System', icon: '🧬', path: '/ranks' },
-  { id: 'setari', name: 'Settings', icon: '⚙️', path: '/setari' },
-  { id: 'muzica', name: 'Music Control', icon: '🎵', path: '/muzica' },
-  { id: 'economie', name: 'Economy', icon: '💠', path: '/economie' },
-  { id: 'loguri', name: 'Event Logs', icon: '🛰️', path: '/loguri' },
+const navSections = [
+  {
+    title: 'Core Systems',
+    items: [
+      { id: 'jocuri', name: 'Server Analytics', icon: '📈', path: '/jocuri' },
+      { id: 'moderare', name: 'Moderation', icon: '🛡️', path: '/moderare' },
+      { id: 'selfroles', name: 'Self Roles', icon: '🧩', path: '/selfroles' },
+      { id: 'templates', name: 'Server Templates', icon: '🧱', path: '/templates-server' },
+      { id: 'ranks', name: 'Leveling System', icon: '🧬', path: '/ranks' },
+      { id: 'setari', name: 'Settings', icon: '⚙️', path: '/setari' },
+    ],
+  },
+  {
+    title: 'Automation & Music',
+    items: [
+      { id: 'muzica', name: 'Music Control', icon: '🎵', path: '/muzica' },
+      { id: 'jarvis', name: 'Jarvis Voice AI', icon: '🧠', path: '/jarvis-music' },
+      { id: 'automod', name: 'Auto Moderation', icon: '🚨', path: '/auto-moderation' },
+      { id: 'welcome', name: 'Welcome Flow', icon: '✨', path: '/welcome-flow' },
+      { id: 'tickets', name: 'Tickets & Support', icon: '🎫', path: '/tickets' },
+    ],
+  },
+  {
+    title: 'Operations',
+    items: [
+      { id: 'gamespanel', name: 'Games Panel Access', icon: '🎮', path: '/games-panel' },
+      { id: 'economie', name: 'Economy', icon: '💠', path: '/economie' },
+      { id: 'backup', name: 'Server Backups', icon: '🗄️', path: '/server-backups' },
+      { id: 'integrations', name: 'Integrations', icon: '🔌', path: '/integrations' },
+      { id: 'loguri', name: 'Event Logs', icon: '🛰️', path: '/loguri' },
+    ],
+  },
 ];
 
 function Sidebar({ currentModule, setCurrentModule }) {
@@ -88,28 +112,20 @@ function Sidebar({ currentModule, setCurrentModule }) {
       </div>
 
       <nav className="sidebar-nav">
-        <div className="nav-section-title">Core Systems</div>
-        {modules.slice(0, 4).map((module) => (
-          <button
-            key={module.id}
-            className={`nav-item ${currentModule === module.id ? 'active' : ''}`}
-            onClick={() => handleModuleClick(module)}
-          >
-            <span className="nav-icon">{module.icon}</span>
-            <span className="nav-text">{module.name}</span>
-          </button>
-        ))}
-
-        <div className="nav-section-title">Operations</div>
-        {modules.slice(4).map((module) => (
-          <button
-            key={module.id}
-            className={`nav-item ${currentModule === module.id ? 'active' : ''}`}
-            onClick={() => handleModuleClick(module)}
-          >
-            <span className="nav-icon">{module.icon}</span>
-            <span className="nav-text">{module.name}</span>
-          </button>
+        {navSections.map((section) => (
+          <div key={section.title} className="nav-section-block">
+            <div className="nav-section-title">{section.title}</div>
+            {section.items.map((module) => (
+              <button
+                key={module.id}
+                className={`nav-item ${currentModule === module.id ? 'active' : ''}`}
+                onClick={() => handleModuleClick(module)}
+              >
+                <span className="nav-icon">{module.icon}</span>
+                <span className="nav-text">{module.name}</span>
+              </button>
+            ))}
+          </div>
         ))}
       </nav>
 

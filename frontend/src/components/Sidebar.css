@@ -90,6 +90,10 @@
   overflow-y: auto;
 }
 
+.nav-section-block {
+  margin-bottom: 10px;
+}
+
 .nav-section-title {
   font-size: 11px;
   color: var(--text-muted);
@@ -113,6 +117,7 @@
   text-align: left;
   margin-bottom: 6px;
   transition: all 0.2s ease;
+  animation: navSlideIn 0.34s ease both;
 }
 
 .nav-item:hover {
@@ -144,6 +149,23 @@
 .nav-item.active .nav-icon {
   background: rgba(8, 217, 255, 0.15);
   border-color: rgba(8, 217, 255, 0.5);
+}
+
+.nav-section-block .nav-item:nth-child(2) { animation-delay: 0.02s; }
+.nav-section-block .nav-item:nth-child(3) { animation-delay: 0.04s; }
+.nav-section-block .nav-item:nth-child(4) { animation-delay: 0.06s; }
+.nav-section-block .nav-item:nth-child(5) { animation-delay: 0.08s; }
+.nav-section-block .nav-item:nth-child(6) { animation-delay: 0.1s; }
+
+@keyframes navSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .sidebar-footer {
