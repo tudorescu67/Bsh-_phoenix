@@ -43,6 +43,7 @@ function App() {
             isBotOnline={isBotOnline} 
             ping={ping} 
             uptime={uptime} 
+            currentModule={currentModule}
           />
           <div className="content-area">
             <Routes>

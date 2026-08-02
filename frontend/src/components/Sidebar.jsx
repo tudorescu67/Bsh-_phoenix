@@ -1,16 +1,18 @@
 /* by Capitanul burcea,alex */
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './Sidebar.css';
 
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
+
 const modules = [
-  { id: 'muzica', name: 'Muzică', icon: '🎵', path: '/muzica' },
-  { id: 'jocuri', name: 'Jocuri', icon: '🎮', path: '/jocuri' },
-  { id: 'economie', name: 'Economie', icon: '💰', path: '/economie' },
-  { id: 'ranks', name: 'Ranks', icon: '🏆', path: '/ranks' },
-  { id: 'moderare', name: 'Moderare', icon: '🛡️', path: '/moderare' },
-  { id: 'setari', name: 'Setări', icon: '⚙️', path: '/setari' },
-  { id: 'loguri', name: 'Loguri', icon: '📋', path: '/loguri' },
+  { id: 'jocuri', name: 'Server Analytics', icon: '📈', path: '/jocuri' },
+  { id: 'moderare', name: 'Moderation', icon: '🛡️', path: '/moderare' },
+  { id: 'ranks', name: 'Leveling System', icon: '🧬', path: '/ranks' },
+  { id: 'setari', name: 'Settings', icon: '⚙️', path: '/setari' },
+  { id: 'muzica', name: 'Music Control', icon: '🎵', path: '/muzica' },
+  { id: 'economie', name: 'Economy', icon: '💠', path: '/economie' },
+  { id: 'loguri', name: 'Event Logs', icon: '🛰️', path: '/loguri' },
 ];
 
 function Sidebar({ currentModule, setCurrentModule }) {
@@ -23,7 +25,7 @@ function Sidebar({ currentModule, setCurrentModule }) {
 
     async function loadServers() {
       try {
-        const response = await fetch('http://localhost:5000/api/dashboard/servers');
+        const response = await fetch(`${API_BASE_URL}/dashboard/servers`);
         const json = await response.json();
 
         if (mounted) {
@@ -58,7 +60,8 @@ function Sidebar({ currentModule, setCurrentModule }) {
   return (
     <div className="sidebar">
       <div className="sidebar-header">
-        <h1 className="logo">Phoenix<span className="logo-accent">.js</span></h1>
+        <h1 className="logo">Phoenix<span className="logo-accent">Pulse</span></h1>
+        <div className="logo-subtitle">Discord Command Center</div>
       </div>
 
       <div className="server-selector">
@@ -85,7 +88,20 @@ function Sidebar({ currentModule, setCurrentModule }) {
       </div>
 
       <nav className="sidebar-nav">
-        {modules.map((module) => (
+        <div className="nav-section-title">Core Systems</div>
+        {modules.slice(0, 4).map((module) => (
+          <button
+            key={module.id}
+            className={`nav-item ${currentModule === module.id ? 'active' : ''}`}
+            onClick={() => handleModuleClick(module)}
+          >
+            <span className="nav-icon">{module.icon}</span>
+            <span className="nav-text">{module.name}</span>
+          </button>
+        ))}
+
+        <div className="nav-section-title">Operations</div>
+        {modules.slice(4).map((module) => (
           <button
             key={module.id}
             className={`nav-item ${currentModule === module.id ? 'active' : ''}`}

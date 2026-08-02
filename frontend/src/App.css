@@ -2,6 +2,7 @@
 .app-container {
   display: flex;
   min-height: 100vh;
+  position: relative;
 }
 
 .main-content {
@@ -9,10 +10,32 @@
   display: flex;
   flex-direction: column;
   margin-left: 280px;
+  min-height: 100vh;
+  position: relative;
 }
 
 .content-area {
   flex: 1;
-  padding: 24px;
+  padding: 22px 24px 26px;
   overflow-y: auto;
+  position: relative;
+}
+
+.content-area::before {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border: 1px solid rgba(108, 92, 231, 0.1);
+  border-radius: 18px;
+  pointer-events: none;
+}
+
+@media (max-width: 1080px) {
+  .main-content {
+    margin-left: 0;
+  }
+
+  .content-area {
+    padding: 18px;
+  }
 }

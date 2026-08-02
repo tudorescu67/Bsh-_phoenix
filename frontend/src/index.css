@@ -1,15 +1,28 @@
 /* by Capitanul burcea,alex */
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
 :root {
-  --bg-primary: #0A0E14;
-  --bg-secondary: #12161F;
-  --accent-primary: #2563EB;
-  --accent-secondary: #3B82F6;
-  --accent-neon: #00D4FF;
-  --text-primary: #E2E8F0;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
-  --status-online: #22C55E;
-  --status-offline: #EF4444;
+  --bg-primary: #06080f;
+  --bg-secondary: #0f1320;
+  --bg-tertiary: #131a2e;
+  --glass-bg: rgba(15, 19, 32, 0.65);
+  --glass-border: rgba(108, 92, 231, 0.28);
+
+  --accent-primary: #6c5ce7;
+  --accent-secondary: #00b4ff;
+  --accent-tertiary: #2dffb2;
+  --accent-neon: #08d9ff;
+
+  --text-primary: #edf2ff;
+  --text-secondary: #a5b1d8;
+  --text-muted: #6e7a9f;
+
+  --status-online: #32ff88;
+  --status-offline: #ff5876;
+  --danger-soft: rgba(255, 88, 118, 0.2);
+
+  --shadow-neon: 0 0 30px rgba(8, 217, 255, 0.18);
+  --shadow-panel: 0 16px 40px rgba(3, 8, 20, 0.55);
 }
 
 * {
@@ -19,10 +32,20 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background-color: var(--bg-primary);
+  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+  background:
+    radial-gradient(circle at 15% 15%, rgba(108, 92, 231, 0.2) 0%, transparent 42%),
+    radial-gradient(circle at 85% 10%, rgba(0, 180, 255, 0.18) 0%, transparent 36%),
+    radial-gradient(circle at 65% 80%, rgba(45, 255, 178, 0.1) 0%, transparent 42%),
+    var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+#root {
+  min-height: 100vh;
 }
 
 a {
@@ -39,11 +62,11 @@ button {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+  background: rgba(9, 14, 26, 0.85);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--bg-secondary);
+  background: linear-gradient(180deg, rgba(108, 92, 231, 0.85), rgba(0, 180, 255, 0.85));
   border-radius: 4px;
 }
 
