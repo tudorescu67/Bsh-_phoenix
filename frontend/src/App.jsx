@@ -15,6 +15,7 @@ import './App.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || API_BASE_URL;
+const ROUTER_BASENAME = import.meta.env.VITE_ROUTER_BASENAME || '/';
 const socket = io(SOCKET_URL);
 
 function App() {
@@ -34,7 +35,7 @@ function App() {
   }, []);
 
   return (
-    <Router>
+    <Router basename={ROUTER_BASENAME}>
       <div className="app-container">
         <Sidebar currentModule={currentModule} setCurrentModule={setCurrentModule} />
         <div className="main-content">
