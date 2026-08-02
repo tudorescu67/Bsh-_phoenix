@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ro">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phoenix Dashboard</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <div class="app">
+      <div class="topbar">
+        <div>
+          <h1>Phoenix Dashboard</h1>
+          <p>Panou real pentru botul Discord și setările serverului</p>
+        </div>
+        <div class="topbar-actions">
+          <div id="authCard" class="auth-card">
+            <div class="auth-avatar" id="authAvatar">?</div>
+            <div>
+              <div id="authUser">Neautentificat</div>
+              <div id="authRole" class="muted">Rol: vizitator</div>
+            </div>
+          </div>
+          <button onclick="loginWithDiscord()" id="loginBtn">Autentifică-te cu Discord</button>
+          <button onclick="saveConfig()" id="saveBtn">Salvează</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card"><div class="label">Membri</div><div class="value" id="members">12.4k</div></div>
+        <div class="card"><div class="label">Comenzi</div><div class="value" id="commands">4.1k</div></div>
+        <div class="card"><div class="label">Tickete</div><div class="value" id="tickets">23</div></div>
+        <div class="card"><div class="label">Securitate</div><div class="value" id="security">97%</div></div>
+      </div>
+
+      <div class="section">
+        <div class="panel">
+          <h3>Setări server</h3>
+          <div id="permissionNotice" class="notice">Nu ai permisiuni de editare. Autentifică-te ca administrator sau moderator.</div>
+          <label class="label">Nume server</label>
+          <input id="serverName" value="BSH • Discord" />
+          <label class="label">Prefix bot</label>
+          <input id="prefix" value="!" />
+          <label class="label">Canal welcome</label>
+          <input id="welcomeChannel" value="#welcome" />
+          <label class="label">Rol welcome</label>
+          <input id="welcomeRole" value="Member" />
+          <label class="label">Mesaj welcome</label>
+          <textarea id="welcomeMessage">Bun venit pe server! Citește regulile și alege rolurile potrivite.</textarea>
+          <button style="margin-top:10px;" onclick="saveConfig()" id="applyBtn">Aplică modificările</button>
+        </div>
+
+        <div class="panel">
+          <h3>Permisiuni disponibile</h3>
+          <div id="permissions" class="pill-row"></div>
+          <h3 style="margin-top:16px;">Moduri active</h3>
+          <div id="modules" class="pill-row"></div>
+          <h3 style="margin-top:16px;">Activitate recentă</h3>
+          <div id="activity" class="muted"></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

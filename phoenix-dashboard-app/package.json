@@ -1,0 +1,12 @@
+{
+  "name": "phoenix-dashboard-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "npx serve .",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "serve": "^14.0.1"
+  }
+}
