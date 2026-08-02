@@ -1,122 +1,86 @@
 <!DOCTYPE html>
 <html lang="ro">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NOKI // Panou de control bot</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#131419;
-  --bg-grain: radial-gradient(circle at 50% 0%, #191b22 0%, #101116 65%);
-  --panel:#1b1d25;
-  --panel-2:#20222b;
-  --panel-3:#25272f;
-  --border:#2d303b;
-  --border-soft:#25272f;
-  --text:#eae7e0;
-  --text-dim:#8c8e9c;
-  --text-faint:#5b5d69;
-  --amber:#ffb454;
-  --amber-dim:#7a5a2c;
-  --cyan:#5eead4;
-  --cyan-dim:#2c5852;
-  --red:#ff6b6b;
-  --red-dim:#5c2e2e;
-  --violet:#b39ffb;
-  --radius:14px;
-  --font-display:'Space Grotesk', sans-serif;
-  --font-body:'Inter', sans-serif;
-  --font-mono:'JetBrains Mono', monospace;
-}
-*{box-sizing:border-box; margin:0; padding:0;}
-html,body{
-  background:var(--bg-grain), var(--bg);
-  color:var(--text);
-  font-family:var(--font-body);
-  min-height:100vh;
-  -webkit-font-smoothing:antialiased;
-}
-::selection{background:var(--amber); color:#1a1a1a;}
-::-webkit-scrollbar{width:10px; height:10px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--panel-3); border-radius:8px; border:2px solid var(--bg);}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AlexMenu Dashboard 2.5.6</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <div class="app">
+      <div class="topbar">
+        <div>
+          <h1>AlexMenu Dashboard</h1>
+          <p>Panou real pentru botul Discord și setările serverului · v2.5.6</p>
+        </div>
+        <div class="topbar-actions">
+          <div id="authCard" class="auth-card">
+            <div class="auth-avatar" id="authAvatar">?</div>
+            <div>
+              <div id="authUser">Neautentificat</div>
+              <div id="authRole" class="muted">Rol: vizitator</div>
+            </div>
+          </div>
+          <button onclick="loginWithDiscord()" id="loginBtn">Autentifică-te cu Discord</button>
+          <button onclick="logout()" id="logoutBtn" class="button-danger" style="display:none;">Logout</button>
+          <button onclick="saveConfig()" id="saveBtn">Salvează</button>
+        </div>
+      </div>
 
-/* ---------- layout shell ---------- */
-.shell{
-  display:grid;
-  grid-template-columns:248px 1fr;
-  min-height:100vh;
-}
-@media (max-width:900px){
-  .shell{grid-template-columns:1fr;}
-  .sidebar{position:fixed; z-index:50; height:100vh; transform:translateX(-100%); transition:transform .25s ease;}
-  .sidebar.open{transform:translateX(0);}
-  .mobile-toggle{display:flex !important;}
-}
+      <div class="grid">
+        <div class="card"><div class="label">Membri</div><div class="value" id="members">12.4k</div></div>
+        <div class="card"><div class="label">Comenzi</div><div class="value" id="commands">4.1k</div></div>
+        <div class="card"><div class="label">Tickete</div><div class="value" id="tickets">23</div></div>
+        <div class="card"><div class="label">Securitate</div><div class="value" id="security">97%</div></div>
+      </div>
 
-/* ---------- sidebar ---------- */
-.sidebar{
-  background:linear-gradient(180deg, #191a20 0%, #15161b 100%);
-  border-right:1px solid var(--border);
-  padding:22px 16px;
-  display:flex;
-  flex-direction:column;
-  gap:26px;
-}
-.brand{
-  display:flex; align-items:center; gap:12px;
-  padding:4px 6px 18px 6px;
-  border-bottom:1px solid var(--border-soft);
-}
-.brand-mark{
-  width:38px; height:38px; border-radius:10px;
-  background:linear-gradient(145deg, #2a2c36, #1c1e26);
-  border:1px solid var(--border);
-  display:flex; align-items:center; justify-content:center;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 0 0 1px rgba(0,0,0,.3);
-  position:relative;
-}
-.brand-mark::after{
-  content:''; position:absolute; inset:0; border-radius:10px;
-  box-shadow: 0 0 14px rgba(255,180,84,.35);
-  opacity:.8;
-}
-.brand-mark svg{width:20px; height:20px; position:relative; z-index:1;}
-.brand-text .name{font-family:var(--font-display); font-weight:700; font-size:15px; letter-spacing:.3px;}
-.brand-text .sub{font-family:var(--font-mono); font-size:10px; color:var(--text-faint); letter-spacing:1px; text-transform:uppercase; margin-top:2px;}
+      <div class="section">
+        <div class="panel">
+          <h3>Setări server</h3>
+          <div id="permissionNotice" class="notice">Nu ai permisiuni de editare. Autentifică-te ca administrator sau moderator.</div>
+          <label class="label">Nume server</label>
+          <input id="serverName" value="BSH • Discord" />
+          <label class="label">Prefix bot</label>
+          <input id="prefix" value="!" />
+          <label class="label">Canal welcome</label>
+          <input id="welcomeChannel" value="#welcome" />
+          <label class="label">Rol welcome</label>
+          <input id="welcomeRole" value="Member" />
+          <label class="label">Mesaj welcome</label>
+          <textarea id="welcomeMessage">Bun venit pe server! Citește regulile și alege rolurile potrivite.</textarea>
+          <label class="label">Dashboard API URL</label>
+          <input id="dashboardApi" value="http://localhost:3100" />
+          <div class="button-row">
+            <button style="margin-top:10px;" onclick="saveConfig()" id="applyBtn">Aplică modificările</button>
+            <button style="margin-top:10px;" class="button-secondary" onclick="resetConfig()" id="resetBtn">Reset setări</button>
+            <button style="margin-top:10px;" class="button-secondary" onclick="exportConfig()" id="exportBtn">Export JSON</button>
+          </div>
+        </div>
 
-.server-picker{
-  display:flex; align-items:center; gap:10px;
-  background:var(--panel); border:1px solid var(--border);
-  border-radius:10px; padding:9px 10px; cursor:pointer;
-  transition:border-color .15s;
-}
-.server-picker:hover{border-color:#3a3d4a;}
-.server-picker .avatar{
-  width:26px; height:26px; border-radius:7px;
-  background:linear-gradient(135deg, var(--amber), #d98f3a);
-  flex-shrink:0;
-}
-.server-picker .info{flex:1; min-width:0;}
-.server-picker .info .n{font-size:12.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.server-picker .info .m{font-family:var(--font-mono); font-size:10px; color:var(--text-faint);}
-.server-picker .chev{color:var(--text-faint); font-size:10px;}
+        <div class="panel">
+          <h3>Stare conexiune</h3>
+          <div class="row-inline">
+            <span id="apiHealth" class="status-pill status-offline">offline</span>
+            <button class="button-secondary" onclick="checkApiHealth()">Verifică API</button>
+          </div>
+          <div id="lastSync" class="muted" style="margin-top:8px;">Ultima sincronizare: -</div>
 
-nav.navlist{display:flex; flex-direction:column; gap:2px;}
-.nav-label{font-family:var(--font-mono); font-size:10px; letter-spacing:1.5px; color:var(--text-faint); text-transform:uppercase; padding:10px 10px 6px;}
-.nav-item{
-  display:flex; align-items:center; gap:11px;
-  padding:9px 10px; border-radius:9px;
-  color:var(--text-dim); text-decoration:none;
-  font-size:13px; font-weight:500;
-  position:relative;
-  transition:background .15s, color .15s;
-}
-.nav-item svg{width:16px; height:16px; opacity:.8; flex-shrink:0;}
-.nav-item:hover{background:var(--panel); color:var(--text);}
-.nav-item.active{background:var(--panel-2); color:var(--text);}
+          <h3 style="margin-top:16px;">Control module</h3>
+          <div id="moduleControls" class="module-grid"></div>
+
+          <h3>Permisiuni disponibile</h3>
+          <div id="permissions" class="pill-row"></div>
+          <h3 style="margin-top:16px;">Moduri active</h3>
+          <div id="modules" class="pill-row"></div>
+          <h3 style="margin-top:16px;">Activitate recentă</h3>
+          <div id="activity" class="muted"></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
 .nav-item.active::before{
   content:''; position:absolute; left:-16px; top:50%; transform:translateY(-50%);
   width:3px; height:16px; border-radius:3px; background:var(--amber);
@@ -462,6 +426,82 @@ footer.foot span{font-family:var(--font-mono); font-size:10.5px; color:var(--tex
         <div class="user-chip">
           <div class="av"></div>
           <span>andrei_mod</span>
+=======
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AlexMenu Dashboard 2.5.6</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <div class="app">
+      <div class="topbar">
+        <div>
+          <h1>AlexMenu Dashboard</h1>
+          <p>Panou real pentru botul Discord și setările serverului · v2.5.6</p>
+        </div>
+        <div class="topbar-actions">
+          <div id="authCard" class="auth-card">
+            <div class="auth-avatar" id="authAvatar">?</div>
+            <div>
+              <div id="authUser">Neautentificat</div>
+              <div id="authRole" class="muted">Rol: vizitator</div>
+            </div>
+          </div>
+          <button onclick="loginWithDiscord()" id="loginBtn">Autentifică-te cu Discord</button>
+          <button onclick="logout()" id="logoutBtn" class="button-danger" style="display:none;">Logout</button>
+          <button onclick="saveConfig()" id="saveBtn">Salvează</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card"><div class="label">Membri</div><div class="value" id="members">12.4k</div></div>
+        <div class="card"><div class="label">Comenzi</div><div class="value" id="commands">4.1k</div></div>
+        <div class="card"><div class="label">Tickete</div><div class="value" id="tickets">23</div></div>
+        <div class="card"><div class="label">Securitate</div><div class="value" id="security">97%</div></div>
+      </div>
+
+      <div class="section">
+        <div class="panel">
+          <h3>Setări server</h3>
+          <div id="permissionNotice" class="notice">Nu ai permisiuni de editare. Autentifică-te ca administrator sau moderator.</div>
+          <label class="label">Nume server</label>
+          <input id="serverName" value="BSH • Discord" />
+          <label class="label">Prefix bot</label>
+          <input id="prefix" value="!" />
+          <label class="label">Canal welcome</label>
+          <input id="welcomeChannel" value="#welcome" />
+          <label class="label">Rol welcome</label>
+          <input id="welcomeRole" value="Member" />
+          <label class="label">Mesaj welcome</label>
+          <textarea id="welcomeMessage">Bun venit pe server! Citește regulile și alege rolurile potrivite.</textarea>
+          <label class="label">Dashboard API URL</label>
+          <input id="dashboardApi" value="http://localhost:3100" />
+          <div class="button-row">
+            <button style="margin-top:10px;" onclick="saveConfig()" id="applyBtn">Aplică modificările</button>
+            <button style="margin-top:10px;" class="button-secondary" onclick="resetConfig()" id="resetBtn">Reset setări</button>
+            <button style="margin-top:10px;" class="button-secondary" onclick="exportConfig()" id="exportBtn">Export JSON</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Stare conexiune</h3>
+          <div class="row-inline">
+            <span id="apiHealth" class="status-pill status-offline">offline</span>
+            <button class="button-secondary" onclick="checkApiHealth()">Verifică API</button>
+          </div>
+          <div id="lastSync" class="muted" style="margin-top:8px;">Ultima sincronizare: -</div>
+
+          <h3 style="margin-top:16px;">Control module</h3>
+          <div id="moduleControls" class="module-grid"></div>
+
+          <h3>Permisiuni disponibile</h3>
+          <div id="permissions" class="pill-row"></div>
+          <h3 style="margin-top:16px;">Moduri active</h3>
+          <div id="modules" class="pill-row"></div>
+          <h3 style="margin-top:16px;">Activitate recentă</h3>
+          <div id="activity" class="muted"></div>
+>>>>>>> aa47bce2 (Release AlexMenu dashboard 2.5.6)
         </div>
       </div>
     </div>
