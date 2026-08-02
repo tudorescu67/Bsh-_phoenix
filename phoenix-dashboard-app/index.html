@@ -22,6 +22,7 @@
             </div>
           </div>
           <button onclick="loginWithDiscord()" id="loginBtn">Autentifică-te cu Discord</button>
+          <button onclick="logout()" id="logoutBtn" class="button-danger" style="display:none;">Logout</button>
           <button onclick="saveConfig()" id="saveBtn">Salvează</button>
         </div>
       </div>
@@ -47,10 +48,26 @@
           <input id="welcomeRole" value="Member" />
           <label class="label">Mesaj welcome</label>
           <textarea id="welcomeMessage">Bun venit pe server! Citește regulile și alege rolurile potrivite.</textarea>
-          <button style="margin-top:10px;" onclick="saveConfig()" id="applyBtn">Aplică modificările</button>
+          <label class="label">Dashboard API URL</label>
+          <input id="dashboardApi" value="http://localhost:3100" />
+          <div class="button-row">
+            <button style="margin-top:10px;" onclick="saveConfig()" id="applyBtn">Aplică modificările</button>
+            <button style="margin-top:10px;" class="button-secondary" onclick="resetConfig()" id="resetBtn">Reset setări</button>
+            <button style="margin-top:10px;" class="button-secondary" onclick="exportConfig()" id="exportBtn">Export JSON</button>
+          </div>
         </div>
 
         <div class="panel">
+          <h3>Stare conexiune</h3>
+          <div class="row-inline">
+            <span id="apiHealth" class="status-pill status-offline">offline</span>
+            <button class="button-secondary" onclick="checkApiHealth()">Verifică API</button>
+          </div>
+          <div id="lastSync" class="muted" style="margin-top:8px;">Ultima sincronizare: -</div>
+
+          <h3 style="margin-top:16px;">Control module</h3>
+          <div id="moduleControls" class="module-grid"></div>
+
           <h3>Permisiuni disponibile</h3>
           <div id="permissions" class="pill-row"></div>
           <h3 style="margin-top:16px;">Moduri active</h3>

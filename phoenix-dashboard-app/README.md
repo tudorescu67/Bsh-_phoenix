@@ -29,6 +29,18 @@ Aplicatie simplă, gata pentru Vercel sau VPS, cu autentificare simulată prin D
    - ./deploy-vps.sh user@IP
    - exemplu: ./deploy-vps.sh root@185.203.118.214 /var/www/phoenix-dashboard
 
+## Update rapid pe VPS (fără bot-core)
+
+1. Din repo-ul de pe VPS rulezi:
+   - chmod +x phoenix-dashboard-app/vps-update-dashboard-only.sh
+   - ./phoenix-dashboard-app/vps-update-dashboard-only.sh /home/phoenix/Bsh-_phoenix
+
+Scriptul face doar:
+- git pull pe main
+- npm ci în phoenix-dashboard-app
+- restart la phoenix-dashboard-api și phoenix-dashboard
+- nu atinge bot-core
+
 ## Ce include
 
 - autentificare simulată prin Discord
